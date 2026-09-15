@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamlist } from "../navigation/AppNavigator";
 import CafeCard from "../components/CafeCard";
 import { mockCafes } from "../data/mockCafes";
+import { rankCafeByIntent } from "../services/cafeRanking";
 
 type Props = NativeStackScreenProps<RootStackParamlist, 'Results'>;
 
@@ -11,22 +12,10 @@ export default function ResultsScreen({ route }: Props) {
 
     const { intent } = route.params;
 
-    const sortedCafes = [...mockCafes].sort((a, b) => {
-        const aMatchesIntent = a.intents.includes(intent);
-        const bMatchesIntent = b.intents.includes(intent);
-
-        if(aMatchesIntent && !bMatchesIntent)
-        {
-            return -1;
-        }
-
-        if(!aMatchesIntent && bMatchesIntent)
-        {
-            return 1;
-        }
-
-        return b.rating - a.rating;
-    })
+    const sortedCafes = rankCafeByIntent(
+        mockCafes,
+        intent
+    );
 
     const intentTitles = {
         work: 'Cafés para trabajar',

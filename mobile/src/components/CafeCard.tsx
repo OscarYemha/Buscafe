@@ -34,7 +34,7 @@ export default function CafeCard({ cafe, selectedIntent }: Props) {
       >
            {matchesIntent
                ? `✓ Ideal para ${intentLabel}`
-               : `✗ Quizás no es lo ideal para ${intentLabel}`}
+               : `✗ Quizás no es ideal para ${intentLabel}`}
         </Text>
 
       <View style={styles.infoRow}>
