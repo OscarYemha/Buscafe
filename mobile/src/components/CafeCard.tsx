@@ -3,6 +3,7 @@ import { StyleSheet, Text, TouchableOpacity,View } from 'react-native';
 import { Cafe } from '../types/Cafe';
 import { CafeIntent } from '../types/CafeIntent';
 import { cafeIntents } from '../data/cafeIntents';
+import { priceLabels } from '../utils/price';
 
 type Props = {
   cafe: Cafe;
@@ -20,6 +21,8 @@ export default function CafeCard({ cafe, selectedIntent, onPress }: Props) {
 
     const intentLabel = 
         intentOption?.description ?? selectedIntent;
+
+    const priceLabel = priceLabels[cafe.priceLevel]
 
   return (
     <TouchableOpacity
@@ -39,39 +42,48 @@ export default function CafeCard({ cafe, selectedIntent, onPress }: Props) {
                : `✗ Quizás no es ideal para ${intentLabel}`}
         </Text>
 
-      <View style={styles.infoRow}>
-        <Text style={styles.rating}>★ {cafe.googleRating}</Text>
-
-        <Text style={styles.distance}>
-          {cafe.distanceKm} km
-        </Text>
-
-        <Text style={styles.price}>
-          {'$'.repeat(cafe.priceLevel)}
-        </Text>
-      </View>
-
-      <Text
-        style={[
-          styles.status,
-          cafe.isOpen ? styles.open : styles.closed,
-        ]}
-      >
-        {cafe.isOpen ? 'Abierto' : 'Cerrado'}
-      </Text>
-
-      <View style={styles.featuresContainer}>
-        {cafe.features.map((feature) => (
-          <View
-            key={feature}
-            style={styles.feature}
-          >
-            <Text style={styles.featureText}>
-              {feature}
+        <View style={styles.ratings}>
+            <Text style={styles.rating}>
+                Google ★ {cafe.googleRating}
             </Text>
-          </View>
-        ))}
-      </View>
+
+            <Text style={styles.buscafeRating}>
+                {cafe.buscafeRating !== null
+                    ? `BusCafé ★ ${cafe.buscafeRating}`
+                    : 'BusCafé · Sin valoraciones'}
+            </Text>
+        </View>
+
+        <View style={styles.infoRow}>
+            <Text style={styles.distance}>
+                Distancia: {cafe.distanceKm} km
+            </Text>
+
+            <Text style={styles.price}>
+                Precios: {'$'.repeat(cafe.priceLevel)} · {priceLabel}
+            </Text>
+        </View>
+        <Text
+            style={[
+                styles.status,
+                cafe.isOpen ? styles.open : styles.closed,
+            ]}
+        >
+            {cafe.isOpen ? 'Abierto' : 'Cerrado'}
+        </Text>
+
+        <View style={styles.featuresContainer}>
+            {cafe.features.map((feature) => (
+                <View
+                    key={feature}
+                    style={styles.feature}
+                >
+                    <Text style={styles.featureText}>
+                        {feature}
+                    </Text>
+                </View>
+            ))}
+        </View>
     </TouchableOpacity>
   );
 }
@@ -93,14 +105,27 @@ const styles = StyleSheet.create({
 
     infoRow: {
         flexDirection: 'row',
-        marginTop: 8,
-        gap: 14,
+        marginTop: 10,
+        gap: 20,
+    },
+
+    ratings: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 12,
+        marginTop: 12,
     },
 
     rating: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#4A2416',
+        color: '#7A6254',
+    },
+
+    buscafeRating: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#6B3A22',
     },
 
     distance: {

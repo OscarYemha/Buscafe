@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamlist } from "../navigation/AppNavigator";
 import { mockCafes } from "../data/mockCafes";
 import { cafeIntents } from "../data/cafeIntents";
+import { priceLabels } from '../utils/price';
 
 type Props = NativeStackScreenProps<RootStackParamlist, 'CafeDetail'>;
 
@@ -32,12 +33,6 @@ export default function CafeDetailScreen({ route }: Props)
         )
         .filter((option) => option !== undefined);
 
-    const priceLabels = {
-        1: 'Económico',
-        2: 'Moderado',
-        3: 'Alto',
-        4: 'Muy alto',
-    };
 
     const priceLabel = priceLabels[cafe.priceLevel];
 
