@@ -7,6 +7,8 @@ export type Cafe = {
     distanceKm: number;
     priceLevel: 1 | 2 | 3 | 4;
     isOpen: boolean;
+    address: string;
+    hours: string;
     features: string[];
     intents: CafeIntent[];
 };

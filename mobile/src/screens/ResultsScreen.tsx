@@ -5,6 +5,7 @@ import { RootStackParamlist } from "../navigation/AppNavigator";
 import CafeCard from "../components/CafeCard";
 import { mockCafes } from "../data/mockCafes";
 import { rankCafeByIntent } from "../services/cafeRanking";
+import { cafeIntents } from "../data/cafeIntents";
 
 type Props = NativeStackScreenProps<RootStackParamlist, 'Results'>;
 
@@ -17,16 +18,13 @@ export default function ResultsScreen({ route, navigation }: Props) {
         intent
     );
 
-    const intentTitles = {
-        work: 'Cafés para trabajar',
-        date: 'Cafés para una cita',
-        study: 'Cafés para estudiar',
-        coffee: 'Cafés con buen café',
-        'pet-friendly': 'Cafés pet friendly',
-        food: 'Cafés para comer algo',
-    };
+    const intentOption = cafeIntents.find(
+        (option) => option.id === intent
+    );
 
-    const title = intentTitles[intent];
+    const title = intentOption
+        ? `Cafés para ${intentOption.description}`
+        : 'Cafeterías';
 
     return (
         <SafeAreaView style={styles.container}>

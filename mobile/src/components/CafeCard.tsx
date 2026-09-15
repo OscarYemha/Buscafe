@@ -2,6 +2,7 @@ import { StyleSheet, Text, TouchableOpacity,View } from 'react-native';
 
 import { Cafe } from '../types/Cafe';
 import { CafeIntent } from '../types/CafeIntent';
+import { cafeIntents } from '../data/cafeIntents';
 
 type Props = {
   cafe: Cafe;
@@ -13,16 +14,12 @@ export default function CafeCard({ cafe, selectedIntent, onPress }: Props) {
 
     const matchesIntent = cafe.intents.includes(selectedIntent);
 
-    const intentLabels: Record<CafeIntent, string> = {
-        work: 'trabajar',
-        date: 'una cita',
-        study: 'estudiar',
-        coffee: 'disfrutar un buen café',
-        'pet-friendly': 'ir con mascota',
-        food: 'comer algo',
-    }
-    
-    const intentLabel = intentLabels[selectedIntent]
+    const intentOption = cafeIntents.find(
+        (option) => option.id === selectedIntent
+    );
+
+    const intentLabel = 
+        intentOption?.description ?? selectedIntent;
 
   return (
     <TouchableOpacity

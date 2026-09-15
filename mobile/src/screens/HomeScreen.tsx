@@ -9,24 +9,11 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamlist } from '../navigation/AppNavigator';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CafeIntent } from '../types/CafeIntent';
+import { cafeIntents } from '../data/cafeIntents';
 
 type Props = NativeStackScreenProps<RootStackParamlist, 'Home'>;
 
-type IntentOption = {
-    id: CafeIntent;
-    icon: string;
-    label: string;
-};
 
-const intentOptions: IntentOption[] = [
-    { id: 'work', icon: '💻', label: 'Trabajar' },
-    { id: 'date', icon: '❤️', label: 'Una cita' },
-    { id: 'study', icon: '📚', label: 'Estudiar' },
-    { id: 'coffee', icon: '☕', label: 'Buen café' },
-    { id: 'pet-friendly', icon: '🐕', label: 'Pet friendly' },
-    { id: 'food', icon: '🍰', label: 'Comer algo' },
-];
 
 export default function HomeScreen({navigation}: Props) {
   return (
@@ -57,7 +44,7 @@ export default function HomeScreen({navigation}: Props) {
       </Text>
 
       <View style={styles.optionsContainer}>
-        {intentOptions.map((option) => (
+        {cafeIntents.map((option) => (
             <TouchableOpacity
                 key={option.id}
                 style={styles.optionCard}
