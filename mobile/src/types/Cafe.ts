@@ -1,3 +1,5 @@
+import { CafeIntent } from "./CafeIntent";
+
 export type Cafe = {
     id: string;
     name: string;
@@ -6,4 +8,5 @@ export type Cafe = {
     priceLevel: 1 | 2 | 3 | 4;
     isOpen: boolean;
     features: string[];
+    intents: CafeIntent[];
 };

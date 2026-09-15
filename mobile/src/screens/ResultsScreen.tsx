@@ -11,6 +11,23 @@ export default function ResultsScreen({ route }: Props) {
 
     const { intent } = route.params;
 
+    const sortedCafes = [...mockCafes].sort((a, b) => {
+        const aMatchesIntent = a.intents.includes(intent);
+        const bMatchesIntent = b.intents.includes(intent);
+
+        if(aMatchesIntent && !bMatchesIntent)
+        {
+            return -1;
+        }
+
+        if(!aMatchesIntent && bMatchesIntent)
+        {
+            return 1;
+        }
+
+        return b.rating - a.rating;
+    })
+
     const intentTitles = {
         work: 'Cafés para trabajar',
         date: 'Cafés para una cita',
@@ -34,10 +51,11 @@ export default function ResultsScreen({ route }: Props) {
                 contentContainerStyle={styles.list}
                 showsVerticalScrollIndicator={false}
                 >
-                {mockCafes.map((cafe) => (
+                {sortedCafes.map((cafe) => (
                     <CafeCard
-                    key={cafe.id}
-                    cafe={cafe}
+                        key={cafe.id}
+                        cafe={cafe}
+                        selectedIntent={intent}
                     />
                 ))}
             </ScrollView>
@@ -64,7 +82,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#7A6254',
     },
-    
+
     list: {
         gap: 14,
         paddingTop: 20,

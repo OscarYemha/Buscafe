@@ -9,6 +9,7 @@ export const mockCafes: Cafe[] = [
     priceLevel: 2,
     isOpen: true,
     features: ['Wi-Fi', 'Enchufes', 'Comida'],
+    intents : ['work', 'study', 'food'],
   },
   {
     id: '2',
@@ -18,6 +19,7 @@ export const mockCafes: Cafe[] = [
     priceLevel: 3,
     isOpen: true,
     features: ['Buen café', 'Tranquilo'],
+    intents: ['coffee', 'date', 'study'],
   },
   {
     id: '3',
@@ -27,5 +29,6 @@ export const mockCafes: Cafe[] = [
     priceLevel: 2,
     isOpen: false,
     features: ['Pet friendly', 'Exterior', 'Comida'],
+    intents: ['pet-friendly', 'date', 'food'],
   },
 ];
