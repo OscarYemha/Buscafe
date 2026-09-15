@@ -1,4 +1,4 @@
-import { Linking, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamlist } from "../navigation/AppNavigator";
@@ -46,7 +46,10 @@ export default function CafeDetailScreen({ route }: Props)
 
     return (
         <SafeAreaView style={styles.container}>
-            <View>
+            <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+            >
                 <Text style={styles.title}>
                     {cafe.name}
                 </Text>
@@ -141,6 +144,42 @@ export default function CafeDetailScreen({ route }: Props)
                 </View>
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>
+                        Reseñas de BusCafé
+                    </Text>
+
+                    {cafe.reviews.length > 0 ? (
+                        cafe.reviews.map((review) => (
+                            <View
+                                key={review.id}
+                                style={styles.reviewCard}
+                            >
+                                <View style={styles.reviewHeader}>
+                                    <Text style={styles.reviewUser}>
+                                        {review.userName}
+                                    </Text>
+
+                                    <Text style={styles.reviewRating}>
+                                        ★ {review.rating}
+                                    </Text>
+                                </View>
+
+                                <Text style={styles.reviewComment}>
+                                    {review.comment}
+                                </Text>
+
+                                <Text style={styles.reviewDate}>
+                                    {review.date}
+                                </Text>
+                            </View>
+                        ))
+                    ) : (
+                        <Text style={styles.emptyReviews}>
+                            Todavía no hay reseñas en BusCafé.
+                        </Text>
+                    )}
+                </View>
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>
                         Contacto
                     </Text>
 
@@ -202,7 +241,7 @@ export default function CafeDetailScreen({ route }: Props)
                         📍 Cómo llegar
                     </Text>
                 </TouchableOpacity>
-            </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }
@@ -325,5 +364,54 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
         color: '#6B3A22',
+    },
+
+    reviewCard: {
+        marginBottom: 12,
+        padding: 14,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: '#E8D9C7',
+    },
+
+    reviewHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+
+    reviewUser: {
+        fontSize: 15,
+        fontWeight: '700',
+        color: '#4A2416',
+    },
+
+    reviewRating: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#6B3A22',
+    },
+
+    reviewComment: {
+        marginTop: 8,
+        fontSize: 14,
+        lineHeight: 20,
+        color: '#7A6254',
+    },
+
+    reviewDate: {
+        marginTop: 8,
+        fontSize: 12,
+        color: '#9A8578',
+    },
+
+    emptyReviews: {
+        fontSize: 14,
+        color: '#7A6254',
+    },
+
+    scrollContent: {
+        paddingBottom: 32,
     },
 });

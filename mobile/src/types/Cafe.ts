@@ -1,4 +1,5 @@
 import { CafeIntent } from "./CafeIntent";
+import { Review } from "./Review";
 
 export type Cafe = {
     id: string;
@@ -18,4 +19,5 @@ export type Cafe = {
     instagram: string | null;
     phone: string | null;
     whatsapp: string | null;
+    reviews: Review[];
 };

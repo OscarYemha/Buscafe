@@ -19,6 +19,22 @@ export const mockCafes: Cafe[] = [
     instagram: 'https://www.instagram.com/cafemartinezoficial/',
     phone: '+541100000001',
     whatsapp: '+5491100000001',
+    reviews: [
+        {
+            id: 'review-1',
+            userName: 'Lucía',
+            rating: 5,
+            comment: 'Muy buen ambiente para trabajar y el café estuvo excelente.',
+            date: '2026-09-10',
+        },
+        {
+            id: 'review-2',
+            userName: 'Martín',
+            rating: 4,
+            comment: 'Cómodo, buena atención y varias opciones para comer.',
+            date: '2026-09-06',
+        },
+    ],
   },
   {
     id: '2',
@@ -38,6 +54,22 @@ export const mockCafes: Cafe[] = [
     instagram: 'https://www.instagram.com/negrocafe/',
     phone: '+541100000002',
     whatsapp: null,
+    reviews: [
+        {
+            id: 'review-3',
+            userName: 'Sofía',
+            rating: 5,
+            comment: 'Excelente café y un ambiente muy tranquilo.',
+            date: '2026-09-12',
+        },
+        {
+            id: 'review-4',
+            userName: 'Nicolás',
+            rating: 5,
+            comment: 'Muy buena experiencia. Volvería sin dudas.',
+            date: '2026-09-02',
+        },
+    ],
   },
   {
     id: '3',
@@ -57,5 +89,6 @@ export const mockCafes: Cafe[] = [
     instagram: null,
     phone: '+541100000003',
     whatsapp: null,
+    reviews: [],
   },
 ];
