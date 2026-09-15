@@ -6,10 +6,29 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamlist } from '../navigation/AppNavigator';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { CafeIntent } from '../types/CafeIntent';
 
-export default function HomeScreen() {
+type Props = NativeStackScreenProps<RootStackParamlist, 'Home'>;
+
+type IntentOption = {
+    id: CafeIntent;
+    icon: string;
+    label: string;
+};
+
+const intentOptions: IntentOption[] = [
+    { id: 'work', icon: '💻', label: 'Trabajar' },
+    { id: 'date', icon: '❤️', label: 'Una cita' },
+    { id: 'study', icon: '📚', label: 'Estudiar' },
+    { id: 'coffee', icon: '☕', label: 'Buen café' },
+    { id: 'pet-friendly', icon: '🐕', label: 'Pet friendly' },
+    { id: 'food', icon: '🍰', label: 'Comer algo' },
+];
+
+export default function HomeScreen({navigation}: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
@@ -38,35 +57,20 @@ export default function HomeScreen() {
       </Text>
 
       <View style={styles.optionsContainer}>
-        <TouchableOpacity style={styles.optionCard}>
-          <Text style={styles.optionIcon}>💻</Text>
-          <Text style={styles.optionText}>Trabajar</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.optionCard}>
-          <Text style={styles.optionIcon}>❤️</Text>
-          <Text style={styles.optionText}>Una cita</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.optionCard}>
-          <Text style={styles.optionIcon}>📚</Text>
-          <Text style={styles.optionText}>Estudiar</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.optionCard}>
-          <Text style={styles.optionIcon}>☕</Text>
-          <Text style={styles.optionText}>Buen café</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.optionCard}>
-          <Text style={styles.optionIcon}>🐕</Text>
-          <Text style={styles.optionText}>Pet friendly</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.optionCard}>
-          <Text style={styles.optionIcon}>🍰</Text>
-          <Text style={styles.optionText}>Comer algo</Text>
-        </TouchableOpacity>
+        {intentOptions.map((option) => (
+            <TouchableOpacity
+                key={option.id}
+                style={styles.optionCard}
+                onPress={() =>
+                    navigation.navigate('Results', {
+                        intent: option.id,
+                    })
+                }
+            >
+                <Text style={styles.optionIcon}>{option.icon}</Text>
+                <Text style={styles.optionText}>{option.label}</Text>
+            </TouchableOpacity>
+        ))}
       </View>
 
       <Text style={styles.sectionTitle}>
