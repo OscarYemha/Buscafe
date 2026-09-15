@@ -8,7 +8,7 @@ import { rankCafeByIntent } from "../services/cafeRanking";
 
 type Props = NativeStackScreenProps<RootStackParamlist, 'Results'>;
 
-export default function ResultsScreen({ route }: Props) {
+export default function ResultsScreen({ route, navigation }: Props) {
 
     const { intent } = route.params;
 
@@ -45,6 +45,11 @@ export default function ResultsScreen({ route }: Props) {
                         key={cafe.id}
                         cafe={cafe}
                         selectedIntent={intent}
+                        onPress={() =>
+                            navigation.navigate('CafeDetail', {
+                                cafeId: cafe.id
+                            })
+                        }
                     />
                 ))}
             </ScrollView>

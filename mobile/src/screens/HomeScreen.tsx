@@ -34,7 +34,7 @@ export default function HomeScreen({navigation}: Props) {
       <StatusBar style="dark" />
 
       <View style={styles.header}>
-        <Text style={styles.logo}>Buscafé</Text>
+        <Text style={styles.logo}>BusCafé</Text>
         <Text style={styles.subtitle}>
           Encontrá el café ideal para tu momento
         </Text>
