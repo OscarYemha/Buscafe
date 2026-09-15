@@ -8,7 +8,7 @@ import { priceLabels } from '../utils/price';
 
 type Props = NativeStackScreenProps<RootStackParamlist, 'CafeDetail'>;
 
-export default function CafeDetailScreen({ route }: Props) 
+export default function CafeDetailScreen({ route, navigation }: Props) 
 {
     const { cafeId } = route.params;
 
@@ -178,6 +178,18 @@ export default function CafeDetailScreen({ route }: Props)
                         </Text>
                     )}
                 </View>
+                <TouchableOpacity style={styles.addReviewButton}>
+                    <Text
+                        style={styles.addReviewButtonText}
+                        onPress={() =>
+                            navigation.navigate('AddReview', {
+                                cafeId: cafe.id,
+                            })
+                        }
+                    >
+                        ✍️ Escribir una reseña
+                    </Text>
+                </TouchableOpacity>
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>
                         Contacto
@@ -413,5 +425,20 @@ const styles = StyleSheet.create({
 
     scrollContent: {
         paddingBottom: 32,
+    },
+
+    addReviewButton: {
+        alignSelf: 'flex-start',
+        marginBottom: 14,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 12,
+        backgroundColor: '#F3E4C8',
+    },
+
+    addReviewButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#6B3A22',
     },
 });
