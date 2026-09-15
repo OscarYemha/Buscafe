@@ -40,7 +40,7 @@ export default function CafeCard({ cafe, selectedIntent, onPress }: Props) {
         </Text>
 
       <View style={styles.infoRow}>
-        <Text style={styles.rating}>★ {cafe.rating}</Text>
+        <Text style={styles.rating}>★ {cafe.googleRating}</Text>
 
         <Text style={styles.distance}>
           {cafe.distanceKm} km

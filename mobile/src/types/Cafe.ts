@@ -3,7 +3,10 @@ import { CafeIntent } from "./CafeIntent";
 export type Cafe = {
     id: string;
     name: string;
-    rating: number;
+    googleRating: number;
+    googleReviewsCount: number;
+    buscafeRating: number | null;
+    buscafeReviewsCount: number;
     distanceKm: number;
     priceLevel: 1 | 2 | 3 | 4;
     isOpen: boolean;

@@ -32,6 +32,15 @@ export default function CafeDetailScreen({ route }: Props)
         )
         .filter((option) => option !== undefined);
 
+    const priceLabels = {
+        1: 'Económico',
+        2: 'Moderado',
+        3: 'Alto',
+        4: 'Muy alto',
+    };
+
+const priceLabel = priceLabels[cafe.priceLevel];
+
     return (
         <SafeAreaView style={styles.container}>
             <View>
@@ -39,9 +48,32 @@ export default function CafeDetailScreen({ route }: Props)
                     {cafe.name}
                 </Text>
 
+                <View style={styles.ratingsContainer}>
+                    <View>
+                        <Text style={styles.ratingLabel}>
+                        Google
+                        </Text>
+
+                        <Text style={styles.ratingValue}>
+                        ★ {cafe.googleRating} ({cafe.googleReviewsCount})
+                        </Text>
+                    </View>
+
+                    <View>
+                        <Text style={styles.ratingLabel}>
+                        Comunidad Buscafé
+                        </Text>
+
+                        <Text style={styles.ratingValue}>
+                        {cafe.buscafeRating !== null
+                            ? `★ ${cafe.buscafeRating} (${cafe.buscafeReviewsCount})`
+                            : 'Sin valoraciones'}
+                        </Text>
+                    </View>
+                </View>
+
                 <Text style={styles.summary}>
-                    ★ {cafe.rating} · {cafe.distanceKm} km ·{' '}
-                    {'$'.repeat(cafe.priceLevel)}
+                    Precios: {'$'.repeat(cafe.priceLevel)} · {priceLabel}
                 </Text>
 
                 <View style={styles.section}>
@@ -56,6 +88,10 @@ export default function CafeDetailScreen({ route }: Props)
 
                     <Text style={styles.info}>
                     🕐 {cafe.hours}
+                    </Text>
+
+                    <Text style={styles.info}>
+                    📏 {cafe.distanceKm} km
                     </Text>
 
                     <Text style={styles.info}>
@@ -191,5 +227,23 @@ const styles = StyleSheet.create({
     tagText: {
         fontSize: 13,
         color: '#6B3A22',
+    },
+
+    ratingsContainer: {
+        flexDirection: 'row',
+        gap: 28,
+        marginTop: 16,
+    },
+
+    ratingLabel: {
+        fontSize: 13,
+        color: '#7A6254',
+    },
+
+    ratingValue: {
+        marginTop: 4,
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#4A2416',
     },
 });

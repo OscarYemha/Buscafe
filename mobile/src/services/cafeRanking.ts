@@ -19,6 +19,6 @@ export function rankCafeByIntent(
             return 1;
         }
 
-        return b.rating - a.rating;
+        return b.googleRating - a.googleRating;
     });
 }
