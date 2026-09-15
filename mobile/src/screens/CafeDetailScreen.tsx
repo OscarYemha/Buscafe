@@ -144,6 +144,61 @@ export default function CafeDetailScreen({ route }: Props)
                         ))}
                     </View>
                 </View>
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>
+                        Contacto
+                    </Text>
+
+                    <View style={styles.contactContainer}>
+                        {cafe.website && (
+                            <TouchableOpacity
+                                style={styles.contactButton}
+                                onPress={() => Linking.openURL(cafe.website!)}
+                            >
+                                <Text style={styles.contactButtonText}>
+                                    🌐 Sitio web
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+
+                        {cafe.instagram && (
+                            <TouchableOpacity
+                                style={styles.contactButton}
+                                onPress={() => Linking.openURL(cafe.instagram!)}
+                            >
+                                <Text style={styles.contactButtonText}>
+                                    📷 Instagram
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+
+                        {cafe.phone && (
+                            <TouchableOpacity
+                                style={styles.contactButton}
+                                onPress={() => Linking.openURL(`tel:${cafe.phone}`)}
+                            >
+                                <Text style={styles.contactButtonText}>
+                                    📞 Llamar
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+
+                        {cafe.whatsapp && (
+                            <TouchableOpacity
+                                style={styles.contactButton}
+                                onPress={() =>
+                                    Linking.openURL(
+                                        `https://wa.me/${cafe.whatsapp!.replace(/\D/g, '')}`
+                                    )
+                                }
+                            >
+                                <Text style={styles.contactButtonText}>
+                                    💬 WhatsApp
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                </View>
                 <TouchableOpacity 
                 style={styles.directionsButton}
                 onPress={openDirections}
@@ -256,5 +311,24 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         color: '#4A2416',
+    },
+
+    contactContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    },
+
+    contactButton: {
+        backgroundColor: '#F3E4C8',
+        borderRadius: 12,
+        paddingHorizontal: 12,
+        paddingVertical: 9,
+    },
+
+    contactButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#6B3A22',
     },
 });

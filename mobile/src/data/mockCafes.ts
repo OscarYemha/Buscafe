@@ -15,6 +15,10 @@ export const mockCafes: Cafe[] = [
     hours: '08:00 - 21:00',
     features: ['Wi-Fi', 'Enchufes', 'Comida'],
     intents : ['work', 'study', 'food'],
+    website: 'https://www.cafemartinez.com',
+    instagram: 'https://www.instagram.com/cafemartinezoficial/',
+    phone: '+541100000001',
+    whatsapp: '+5491100000001',
   },
   {
     id: '2',
@@ -30,6 +34,10 @@ export const mockCafes: Cafe[] = [
     hours: '08:00 - 20:00',
     features: ['Buen café', 'Tranquilo'],
     intents: ['coffee', 'date', 'study'],
+    website: null,
+    instagram: 'https://www.instagram.com/negrocafe/',
+    phone: '+541100000002',
+    whatsapp: null,
   },
   {
     id: '3',
@@ -45,5 +53,9 @@ export const mockCafes: Cafe[] = [
     hours: '09:00 - 20:00',
     features: ['Pet friendly', 'Exterior', 'Comida'],
     intents: ['pet-friendly', 'date', 'food'],
+    website: null,
+    instagram: null,
+    phone: '+541100000003',
+    whatsapp: null,
   },
 ];

@@ -14,4 +14,8 @@ export type Cafe = {
     hours: string;
     features: string[];
     intents: CafeIntent[];
+    website: string | null;
+    instagram: string | null;
+    phone: string | null;
+    whatsapp: string | null;
 };
