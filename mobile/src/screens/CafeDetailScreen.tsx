@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Linking, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamlist } from "../navigation/AppNavigator";
@@ -39,7 +39,15 @@ export default function CafeDetailScreen({ route }: Props)
         4: 'Muy alto',
     };
 
-const priceLabel = priceLabels[cafe.priceLevel];
+    const priceLabel = priceLabels[cafe.priceLevel];
+
+    const openDirections = () => {
+        const address = encodeURIComponent(cafe.address);
+
+        Linking.openURL(
+            `https://www.google.com/maps/search/?api=1&query=${address}`
+        );
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -136,7 +144,10 @@ const priceLabel = priceLabels[cafe.priceLevel];
                         ))}
                     </View>
                 </View>
-                <TouchableOpacity style={styles.directionsButton}>
+                <TouchableOpacity 
+                style={styles.directionsButton}
+                onPress={openDirections}
+                >
                     <Text style={styles.directionsButtonText}>
                         📍 Cómo llegar
                     </Text>
