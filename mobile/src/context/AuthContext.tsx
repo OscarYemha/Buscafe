@@ -23,7 +23,7 @@ export function AuthProvider({children, }: {children: ReactNode})
     const login = () => {
         setUser({
             id: 'user-1',
-            name: 'Usuario de pruena',
+            name: 'Usuario de prueba',
             email: 'usuario@buscafe.com',
         });
     };

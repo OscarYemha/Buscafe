@@ -7,6 +7,7 @@ import { mockCafes } from '../data/mockCafes';
 
 import { useReviewDraft } from '../context/ReviewDraftContext';
 import { useAuth } from '../context/AuthContext';
+import { useReviews } from '../context/ReviewsContext';
 
 type Props = NativeStackScreenProps<
     RootStackParamlist,
@@ -30,8 +31,9 @@ export default function AddReviewScreen({ route, navigation }: Props) {
         );
     }
 
-    const {draft, setDraft} = useReviewDraft();
-    const {isAuthenticated} = useAuth();
+    const {draft, setDraft, clearDraft} = useReviewDraft();
+    const {user, isAuthenticated} = useAuth();
+    const { addReview } = useReviews();
 
     const isCurrentCafeDraft = draft.cafeId === cafe.id;
 
@@ -52,11 +54,22 @@ export default function AddReviewScreen({ route, navigation }: Props) {
             return;
         }
 
-        if (!isAuthenticated)
+        if (!isAuthenticated || !user)
         {
             navigation.navigate('Login');
             return;
         }
+
+        addReview(cafe.id, {
+            id: Date.now().toString(),
+            userName: user.name,
+            rating,
+            comment: comment.trim(),
+            date: new Date().toISOString().split('T')[0]
+        })
+
+        clearDraft();
+        navigation.goBack();
     };
 
     return (

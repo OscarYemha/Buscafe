@@ -5,12 +5,14 @@ import { RootStackParamlist } from "../navigation/AppNavigator";
 import { mockCafes } from "../data/mockCafes";
 import { cafeIntents } from "../data/cafeIntents";
 import { priceLabels } from '../utils/price';
+import { useReviews } from "../context/ReviewsContext";
 
 type Props = NativeStackScreenProps<RootStackParamlist, 'CafeDetail'>;
 
 export default function CafeDetailScreen({ route, navigation }: Props) 
 {
     const { cafeId } = route.params;
+    const { reviewsByCafe} = useReviews();
 
     const cafe = mockCafes.find(
         (cafe) => cafe.id === cafeId
@@ -43,6 +45,13 @@ export default function CafeDetailScreen({ route, navigation }: Props)
             `https://www.google.com/maps/search/?api=1&query=${address}`
         );
     };
+
+    const newReviews = reviewsByCafe[cafe.id] ?? [];
+
+    const allReviews = [
+        ...newReviews,
+        ...cafe.reviews,
+    ]
 
     return (
         <SafeAreaView style={styles.container}>
@@ -147,8 +156,8 @@ export default function CafeDetailScreen({ route, navigation }: Props)
                         Reseñas de BusCafé
                     </Text>
 
-                    {cafe.reviews.length > 0 ? (
-                        cafe.reviews.map((review) => (
+                    {allReviews.length > 0 ? (
+                        allReviews.map((review) => (
                             <View
                                 key={review.id}
                                 style={styles.reviewCard}
