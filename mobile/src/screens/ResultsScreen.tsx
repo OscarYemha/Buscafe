@@ -1,7 +1,9 @@
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamlist } from "../navigation/AppNavigator";
+import CafeCard from "../components/CafeCard";
+import { mockCafes } from "../data/mockCafes";
 
 type Props = NativeStackScreenProps<RootStackParamlist, 'Results'>;
 
@@ -28,6 +30,17 @@ export default function ResultsScreen({ route }: Props) {
                     Encontrá la cafetería ideal para tu momento.
                 </Text>
             </View>
+            <ScrollView
+                contentContainerStyle={styles.list}
+                showsVerticalScrollIndicator={false}
+                >
+                {mockCafes.map((cafe) => (
+                    <CafeCard
+                    key={cafe.id}
+                    cafe={cafe}
+                    />
+                ))}
+            </ScrollView>
         </SafeAreaView>
     );
 }
@@ -50,5 +63,11 @@ const styles = StyleSheet.create({
         marginTop: 8,
         fontSize: 16,
         color: '#7A6254',
-    }
+    },
+    
+    list: {
+        gap: 14,
+        paddingTop: 20,
+        paddingBottom: 30,
+    },
 });
