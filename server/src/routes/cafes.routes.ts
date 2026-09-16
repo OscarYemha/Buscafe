@@ -32,6 +32,21 @@ router.get('/:id', async (req, res) => {
             where: {
                 id,
             },
+            include: {
+                reviews: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                            },
+                        },
+                    },
+                    orderBy: {
+                        createdAt: 'desc',
+                    }
+                },
+            },
         });
 
         if (!cafe) {
