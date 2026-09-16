@@ -26,6 +26,43 @@ app.get('/cafes', async (req, res) => {
     }
 });
 
+app.get('/cafes/:id', async (req, res) => {
+    try 
+    {
+        const id = Number(req.params.id);
+
+        if (!Number.isInteger(id) || id <= 0)
+        {
+            return res.status(400).json({
+                error: 'El ID de la cafetería es inválido',
+            });
+        }
+
+        const cafe = await prisma.cafe.findUnique({
+            where: {
+                id,
+            },
+        });
+
+        if (!cafe)
+        {
+            return res.status(404).json({
+                error: 'Cafetería no encontrada',
+            });
+        }
+
+        return res.json(cafe);
+    }
+    catch (error)
+    {
+        console.error(error);
+
+        return res.status(500).json({
+            error: 'No se pudo obtener la cafetería',
+        });
+    }
+})
+
 app.post('/cafes', async (req, res) => {
     try {
         const {
@@ -71,7 +108,7 @@ app.post('/cafes', async (req, res) => {
                 error: 'La cafetería ya existe',
             });
         }
-        
+
         console.error(error);
 
         res.status(500).json({
