@@ -1,5 +1,6 @@
 import express from 'express';
 import cafesRouter from './routes/cafes.routes.js';
+import usersRouter from './routes/users.routes.js'
 
 const app = express();
 
@@ -12,5 +13,6 @@ app.get('/', (req, res) => {
 });
 
 app.use('/cafes', cafesRouter);
+app.use('/users', usersRouter);
 
 export default app;
