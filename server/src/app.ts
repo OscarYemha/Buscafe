@@ -25,4 +25,34 @@ app.get('/cafes', async (req, res) => {
     }
 });
 
+app.post('/cafes', async (req, res) => {
+    try {
+        const {
+            googlePlaceId,
+            name,
+            address,
+            latitude,
+            longitude,
+        } = req.body;
+
+        const cafe = await prisma.cafe.create({
+            data: {
+                googlePlaceId,
+                name,
+                address,
+                latitude,
+                longitude,
+            },
+        });
+
+        res.status(201).json(cafe);
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            error: 'No se pudo crear la cafetería',
+        });
+    }
+});
+
 export default app;
