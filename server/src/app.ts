@@ -1,4 +1,5 @@
 import express from 'express';
+import prisma from './lib/prisma.js';
 
 const app = express();
 
@@ -8,6 +9,20 @@ app.get('/', (req, res) => {
     res.json({
         message: 'API de BusCafé funcionando correctamente',
     });
+});
+
+app.get('/cafes', async (req, res) => {
+    try {
+        const cafes = await prisma.cafe.findMany();
+
+        res.json(cafes);
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            error: 'No se pudieron obtener las cafeterías',
+        });
+    }
 });
 
 export default app;
