@@ -4,6 +4,7 @@ import prisma from '../lib/prisma.js';
 import { searchNearbyCafes } from '../services/googlePlaces.js';
 import { mapGooglePlaceToCafeSummary } from '../services/cafeMapper.js';
 import { calculateDistanceKm } from '../utils/distance.js';
+import { getCafeStats } from '../services/cafeStats.js';
 
 const router = Router();
 
@@ -39,18 +40,34 @@ router.get('/nearby', async (req, res) => {
             longitude
         );
 
-        const cafes = (googleResponse.places ?? [])
+        const mappedCafes = (googleResponse.places ?? [])
             .map(mapGooglePlaceToCafeSummary)
-            .filter((cafe) => cafe !== null)
-            .map((cafe) => ({
-                ...cafe,
-                distanceKm: calculateDistanceKm(
-                    latitude,
-                    longitude,
-                    cafe.latitude,
-                    cafe.longitude
-                ),
-            }));
+            .filter((cafe) => cafe !== null);
+
+        const cafes = await Promise.all(
+            mappedCafes.map(async (cafe) => {
+                const stats = await getCafeStats(
+                    cafe.googlePlaceId
+                );
+
+                return {
+                    ...cafe,
+
+                    buscafeRating:
+                        stats.rating,
+
+                    buscafeReviewsCount:
+                        stats.reviewsCount,
+
+                    distanceKm: calculateDistanceKm(
+                        latitude,
+                        longitude,
+                        cafe.latitude,
+                        cafe.longitude
+                    ),
+                };
+            })
+        );
 
         return res.json(cafes);
     }
