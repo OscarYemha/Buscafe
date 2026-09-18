@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -6,12 +7,31 @@ import CafeCard from "../components/CafeCard";
 import { mockCafes } from "../data/mockCafes";
 import { rankCafeByIntent } from "../services/cafeRanking";
 import { cafeIntents } from "../data/cafeIntents";
+import { getCafes } from "../services/api";
 
 type Props = NativeStackScreenProps<RootStackParamlist, 'Results'>;
 
 export default function ResultsScreen({ route, navigation }: Props) {
 
     const { intent } = route.params;
+
+    useEffect(() => {
+        async function loadCafes() 
+        {
+            try
+            {
+                const cafes = await getCafes();
+
+                console.log('Cafeterías recibidas desde el backend: ', cafes);
+            }
+            catch (error)
+            {
+                console.error('Error al obtener las cafeterías: ', error);
+            }
+        }
+
+        loadCafes();
+    }, []);
 
     const sortedCafes = rankCafeByIntent(
         mockCafes,

@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { Prisma } from '../generated/prisma/client.js';
 import prisma from '../lib/prisma.js';
+import { searchNearbyCafes } from '../services/googlePlaces.js';
+import { error } from 'node:console';
 
 const router = Router();
 
@@ -14,6 +16,36 @@ router.get('/', async (req, res) => {
 
         return res.status(500).json({
             error: 'No se pudieron obtener las cafeterías',
+        });
+    }
+});
+
+router.get('/nearby', async (req, res) => {
+    try
+    {
+        const latitude = Number(req.query.latitude);
+        const longitude = Number(req.query.longitude);
+
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude))
+        {
+            return res.status(400).json({
+                error: 'Latitud y longitud son obligatorias',
+            });
+        }
+
+        const places = await searchNearbyCafes(
+            latitude,
+            longitude
+        );
+
+        return res.json(places);
+    }
+    catch (error)
+    {
+        console.error(error);
+
+        return res.status(500).json({
+            error: 'No se pudieron obtener las cafeterías cercanas',
         });
     }
 });
