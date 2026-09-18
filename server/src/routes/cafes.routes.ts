@@ -69,6 +69,20 @@ router.get('/nearby', async (req, res) => {
             })
         );
 
+        cafes.sort((a, b) => {
+            if (a.distanceKm === null)
+            {
+                return 1;
+            }
+
+            if (b.distanceKm === null)
+            {
+                return -1;
+            }
+
+            return a.distanceKm - b.distanceKm;
+        });
+
         return res.json(cafes);
     }
     catch (error)

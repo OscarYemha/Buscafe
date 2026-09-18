@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 
 import { CafeSummary } from '../types/CafeSummary';
+import { formatDistance } from '../utils/distance';
 
 type Props = {
     cafe: CafeSummary;
@@ -17,9 +18,7 @@ export default function NearbyCafeCard({
     onPress,
 }: Props) {
     const distanceLabel =
-        cafe.distanceKm !== null
-            ? `${cafe.distanceKm.toFixed(1)} km`
-            : 'Distancia no disponible';
+        formatDistance(cafe.distanceKm);
 
     const priceLabel =
         cafe.priceLevel !== null

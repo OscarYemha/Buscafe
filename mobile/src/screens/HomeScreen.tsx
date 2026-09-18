@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -10,65 +12,129 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamlist } from '../navigation/AppNavigator';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { cafeIntents } from '../data/cafeIntents';
+import NearbyCafeCard from '../components/NearbyCafeCard';
+import { CafeSummary } from '../types/CafeSummary';
+import { getNearbyCafes } from '../services/api';
 
 type Props = NativeStackScreenProps<RootStackParamlist, 'Home'>;
 
 
 
 export default function HomeScreen({navigation}: Props) {
+  const [cafes, setCafes] = useState<CafeSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadNearbyCafes() {
+      try
+      {
+        setLoading(true);
+        setError(null);
+
+        const nearbyCafes = await getNearbyCafes(
+          -34.6000,
+          -58.4000
+        );
+
+        setCafes(nearbyCafes);
+      }
+      catch (error)
+      {
+        console.error('Error al obtener las cafeterías cercanas: ', error);
+
+        setError('No se pudieron cargar las cafeterías cercanas');
+      }
+      finally
+      {
+        setLoading(false);
+      }
+    }
+
+    loadNearbyCafes();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      >
+        <StatusBar style="dark" />
 
-      <View style={styles.header}>
-        <Text style={styles.logo}>BusCafé</Text>
-        <Text style={styles.subtitle}>
-          Encontrá el café ideal para tu momento
+        <View style={styles.header}>
+          <Text style={styles.logo}>BusCafé</Text>
+          <Text style={styles.subtitle}>
+            Encontrá el café ideal para tu momento
+          </Text>
+        </View>
+
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar zona o cafetería"
+          placeholderTextColor="#8C7A6B"
+        />
+
+        <TouchableOpacity style={styles.locationButton}>
+          <Text style={styles.locationButtonText}>
+            📍 Cafés cerca de mí
+          </Text>
+        </TouchableOpacity>
+
+        <Text style={styles.sectionTitle}>
+          ¿Qué estás buscando?
         </Text>
-      </View>
 
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Buscar zona o cafetería"
-        placeholderTextColor="#8C7A6B"
-      />
+        <View style={styles.optionsContainer}>
+          {cafeIntents.map((option) => (
+              <TouchableOpacity
+                  key={option.id}
+                  style={styles.optionCard}
+                  onPress={() =>
+                      navigation.navigate('Results', {
+                          intent: option.id,
+                      })
+                  }
+              >
+                  <Text style={styles.optionIcon}>{option.icon}</Text>
+                  <Text style={styles.optionText}>{option.label}</Text>
+              </TouchableOpacity>
+          ))}
+        </View>
 
-      <TouchableOpacity style={styles.locationButton}>
-        <Text style={styles.locationButtonText}>
-          📍 Cafés cerca de mí
+        <Text style={styles.sectionTitle}>
+          Cafés cerca
         </Text>
-      </TouchableOpacity>
 
-      <Text style={styles.sectionTitle}>
-        ¿Qué estás buscando?
-      </Text>
+        {loading && (
+          <Text style={styles.message}>
+            Buscando cafeterías cercanas...
+          </Text>
+        )}
 
-      <View style={styles.optionsContainer}>
-        {cafeIntents.map((option) => (
-            <TouchableOpacity
-                key={option.id}
-                style={styles.optionCard}
-                onPress={() =>
-                    navigation.navigate('Results', {
-                        intent: option.id,
-                    })
-                }
-            >
-                <Text style={styles.optionIcon}>{option.icon}</Text>
-                <Text style={styles.optionText}>{option.label}</Text>
-            </TouchableOpacity>
-        ))}
-      </View>
+        {error && (
+          <Text style={styles.error}>
+            {error}
+          </Text>
+        )}
 
-      <Text style={styles.sectionTitle}>
-        Cafés cerca
-      </Text>
-
-      <View style={styles.emptyCard}>
-        <Text style={styles.emptyText}>
-          Próximamente vamos a mostrar cafeterías acá.
-        </Text>
-      </View>
+        {!loading && !error && (
+          <View style={styles.cafesContainer}>
+            {cafes.map((cafe) => (
+              <NearbyCafeCard
+                key={cafe.googlePlaceId}
+                cafe={cafe}
+                onPress={() => {
+                  console.log(
+                    'Cafetería seleccionada:',
+                    cafe.name
+                  );
+                }}
+              />
+            ))}
+          </View>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -77,7 +143,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8F1E7',
-    paddingHorizontal: 20,
   },
 
   header: {
@@ -166,5 +231,24 @@ const styles = StyleSheet.create({
 
   emptyText: {
     color: '#7A6254',
+  },
+
+  content: {
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+  },
+
+  cafesContainer: {
+    gap: 14,
+  },
+
+  message: {
+    fontSize: 16,
+    color: '#7A6254',
+  },
+
+  error: {
+    fontSize: 16,
+    color: '#A13D32',
   },
 });
