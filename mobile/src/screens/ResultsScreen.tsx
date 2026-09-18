@@ -1,13 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamlist } from "../navigation/AppNavigator";
-import CafeCard from "../components/CafeCard";
-import { mockCafes } from "../data/mockCafes";
-import { rankCafeByIntent } from "../services/cafeRanking";
 import { cafeIntents } from "../data/cafeIntents";
-import { getCafes } from "../services/api";
+import { getNearbyCafes } from "../services/api";
+import { CafeSummary } from "../types/CafeSummary";
+import NearbyCafeCard from "../components/NearbyCafeCard";
 
 type Props = NativeStackScreenProps<RootStackParamlist, 'Results'>;
 
@@ -15,28 +14,40 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
     const { intent } = route.params;
 
+    const [cafes, setCafes] = useState<CafeSummary[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
     useEffect(() => {
-        async function loadCafes() 
+        async function loadNearbyCafes() 
         {
             try
             {
-                const cafes = await getCafes();
+                setLoading(true);
+                setError(null);
 
-                console.log('Cafeterías recibidas desde el backend: ', cafes);
+                const nearbyCafes = await getNearbyCafes(
+                    -34.6000,
+                    -58.4000
+                );
+
+                setCafes(nearbyCafes);
             }
             catch (error)
             {
-                console.error('Error al obtener las cafeterías: ', error);
+                console.error('Error al obtener las cafeterías cercanas: ', error);
+
+                setError('No se pudieron cargar las cafeterías');
+            }
+            finally
+            {
+                setLoading(false);
             }
         }
 
-        loadCafes();
+        loadNearbyCafes();
     }, []);
 
-    const sortedCafes = rankCafeByIntent(
-        mockCafes,
-        intent
-    );
 
     const intentOption = cafeIntents.find(
         (option) => option.id === intent
@@ -58,16 +69,28 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 contentContainerStyle={styles.list}
                 showsVerticalScrollIndicator={false}
                 >
-                {sortedCafes.map((cafe) => (
-                    <CafeCard
-                        key={cafe.id}
+                {loading && (
+                    <Text style={styles.message}>
+                        Buscando cafeterías...
+                    </Text>
+                )}
+
+                {error && (
+                    <Text style={styles.error}>
+                        {error}
+                    </Text>
+                )}
+
+                {!loading && !error && cafes.map((cafe) => (
+                    <NearbyCafeCard
+                        key={cafe.googlePlaceId}
                         cafe={cafe}
-                        selectedIntent={intent}
-                        onPress={() =>
-                            navigation.navigate('CafeDetail', {
-                                cafeId: cafe.id
-                            })
-                        }
+                        onPress={() => {
+                            console.log(
+                                'Cafetería seleccionada:',
+                                cafe.name
+                            );
+                        }}
                     />
                 ))}
             </ScrollView>
@@ -99,5 +122,15 @@ const styles = StyleSheet.create({
         gap: 14,
         paddingTop: 20,
         paddingBottom: 30,
+    },
+
+    message: {
+        fontSize: 16,
+        color: '#7A6254',
+    },
+
+    error: {
+        fontSize: 16,
+        color: '#A13D32',
     },
 });
