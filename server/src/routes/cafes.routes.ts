@@ -3,6 +3,7 @@ import { Prisma } from '../generated/prisma/client.js';
 import prisma from '../lib/prisma.js';
 import { searchNearbyCafes } from '../services/googlePlaces.js';
 import { error } from 'node:console';
+import { mapGooglePlaceToCafeSummary } from '../services/cafeMapper.js';
 
 const router = Router();
 
@@ -33,12 +34,16 @@ router.get('/nearby', async (req, res) => {
             });
         }
 
-        const places = await searchNearbyCafes(
+        const googleResponse = await searchNearbyCafes(
             latitude,
             longitude
         );
 
-        return res.json(places);
+        const cafes = (googleResponse.places ?? [])
+            .map(mapGooglePlaceToCafeSummary)
+            .filter((cafe) => cafe !== null);
+
+        return res.json(cafes);
     }
     catch (error)
     {

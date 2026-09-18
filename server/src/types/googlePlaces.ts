@@ -14,6 +14,14 @@ export type GooglePlace = {
     };
 
     primaryType?: string;
+
+    rating?: number;
+    userRatingCount?: number;
+    priceLevel?: string;
+
+    currentOpeningHours?: {
+        openNow?: boolean;
+    }
 };
 
 export type GoogleNearbySearchResponse = {

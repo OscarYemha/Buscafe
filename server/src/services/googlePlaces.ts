@@ -23,6 +23,10 @@ export async function searchNearbyCafes(latitude: number, longitude: number): Pr
                 'places.formattedAddress',
                 'places.location',
                 'places.primaryType',
+                'places.rating',
+                'places.userRatingCount',
+                'places.priceLevel',
+                'places.currentOpeningHours.openNow',
             ].join(','),
         },
         body: JSON.stringify({
