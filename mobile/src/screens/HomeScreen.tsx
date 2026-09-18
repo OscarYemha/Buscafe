@@ -15,6 +15,7 @@ import { cafeIntents } from '../data/cafeIntents';
 import NearbyCafeCard from '../components/NearbyCafeCard';
 import { CafeSummary } from '../types/CafeSummary';
 import { getNearbyCafes } from '../services/api';
+import { getCurrentLocation } from '../services/location';
 
 type Props = NativeStackScreenProps<RootStackParamlist, 'Home'>;
 
@@ -25,32 +26,48 @@ export default function HomeScreen({navigation}: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadNearbyCafes() {
-      try
-      {
-        setLoading(true);
-        setError(null);
+  async function loadNearbyCafes() {
+    try
+    {
+      setLoading(true);
+      setError(null);
 
-        const nearbyCafes = await getNearbyCafes(
-          -34.6000,
-          -58.4000
+      const location = await getCurrentLocation();
+
+      if (location === null)
+      {
+        setError(
+          'Necesitamos tu ubicación para mostrar cafeterías cercanas.'
         );
 
-        setCafes(nearbyCafes);
+        return;
       }
-      catch (error)
-      {
-        console.error('Error al obtener las cafeterías cercanas: ', error);
 
-        setError('No se pudieron cargar las cafeterías cercanas');
-      }
-      finally
-      {
-        setLoading(false);
-      }
+      const nearbyCafes = await getNearbyCafes(
+        location.latitude,
+        location.longitude
+      );
+
+      setCafes(nearbyCafes);
     }
+    catch (error)
+    {
+      console.error(
+        'Error al obtener las cafeterías cercanas:',
+        error
+      );
 
+      setError(
+        'No se pudieron cargar las cafeterías cercanas.'
+      );
+    }
+    finally
+    {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
     loadNearbyCafes();
   }, []);
 
@@ -68,18 +85,6 @@ export default function HomeScreen({navigation}: Props) {
             Encontrá el café ideal para tu momento
           </Text>
         </View>
-
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Buscar zona o cafetería"
-          placeholderTextColor="#8C7A6B"
-        />
-
-        <TouchableOpacity style={styles.locationButton}>
-          <Text style={styles.locationButtonText}>
-            📍 Cafés cerca de mí
-          </Text>
-        </TouchableOpacity>
 
         <Text style={styles.sectionTitle}>
           ¿Qué estás buscando?
@@ -103,7 +108,7 @@ export default function HomeScreen({navigation}: Props) {
         </View>
 
         <Text style={styles.sectionTitle}>
-          Cafés cerca
+          Cafés cerca de vos
         </Text>
 
         {loading && (
@@ -113,9 +118,20 @@ export default function HomeScreen({navigation}: Props) {
         )}
 
         {error && (
-          <Text style={styles.error}>
-            {error}
-          </Text>
+          <View style={styles.locationCard}>
+            <Text style={styles.error}>
+              {error}
+            </Text>
+
+            <TouchableOpacity
+              style={styles.locationButton}
+              onPress={loadNearbyCafes}
+            >
+              <Text style={styles.locationButtonText}>
+                📍 Usar mi ubicación
+              </Text>
+            </TouchableOpacity>
+          </View>
         )}
 
         {!loading && !error && (
@@ -134,6 +150,28 @@ export default function HomeScreen({navigation}: Props) {
             ))}
           </View>
         )}
+
+        {!loading && !error && cafes.length > 0 && (
+          <TouchableOpacity
+            style={styles.mapButton}
+            onPress={() => {
+              console.log('Abrir mapa');
+            }}
+          >
+            <Text style={styles.mapButtonText}>
+              🗺️ Ver en el mapa
+            </Text>
+          </TouchableOpacity>
+        )}
+        <Text style={styles.sectionTitle}>
+          ¿Buscás en otro lugar?
+        </Text>
+
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar zona o cafetería"
+          placeholderTextColor="#8C7A6B"
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -173,7 +211,7 @@ const styles = StyleSheet.create({
   },
 
   locationButton: {
-    marginTop: 12,
+    marginTop: 14,
     backgroundColor: '#6B3A22',
     paddingVertical: 14,
     borderRadius: 14,
@@ -221,18 +259,6 @@ const styles = StyleSheet.create({
     color: '#4A2416',
   },
 
-  emptyCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#E8D9C7',
-  },
-
-  emptyText: {
-    color: '#7A6254',
-  },
-
   content: {
     paddingHorizontal: 20,
     paddingBottom: 30,
@@ -250,5 +276,27 @@ const styles = StyleSheet.create({
   error: {
     fontSize: 16,
     color: '#A13D32',
+  },
+
+  locationCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E8D9C7',
+  },
+
+  mapButton: {
+    marginTop: 16,
+    backgroundColor: '#6B3A22',
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+
+  mapButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
