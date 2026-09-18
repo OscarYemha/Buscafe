@@ -2,8 +2,8 @@ import { Router } from 'express';
 import { Prisma } from '../generated/prisma/client.js';
 import prisma from '../lib/prisma.js';
 import { searchNearbyCafes } from '../services/googlePlaces.js';
-import { error } from 'node:console';
 import { mapGooglePlaceToCafeSummary } from '../services/cafeMapper.js';
+import { calculateDistanceKm } from '../utils/distance.js';
 
 const router = Router();
 
@@ -41,7 +41,16 @@ router.get('/nearby', async (req, res) => {
 
         const cafes = (googleResponse.places ?? [])
             .map(mapGooglePlaceToCafeSummary)
-            .filter((cafe) => cafe !== null);
+            .filter((cafe) => cafe !== null)
+            .map((cafe) => ({
+                ...cafe,
+                distanceKm: calculateDistanceKm(
+                    latitude,
+                    longitude,
+                    cafe.latitude,
+                    cafe.longitude
+                ),
+            }));
 
         return res.json(cafes);
     }
