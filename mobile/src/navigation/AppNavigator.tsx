@@ -11,6 +11,8 @@ export type RootStackParamlist = {
     Home: undefined;
     Results: {
         intent: CafeIntent;
+        latitude: number;
+        longitude: number;
     };
     CafeDetail: {
         cafeId: string;

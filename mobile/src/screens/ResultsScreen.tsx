@@ -11,8 +11,11 @@ import NearbyCafeCard from "../components/NearbyCafeCard";
 type Props = NativeStackScreenProps<RootStackParamlist, 'Results'>;
 
 export default function ResultsScreen({ route, navigation }: Props) {
-
-    const { intent } = route.params;
+    const {
+        intent,
+        latitude,
+        longitude,
+    } = route.params;
 
     const [cafes, setCafes] = useState<CafeSummary[]>([]);
     const [loading, setLoading] = useState(true);
@@ -27,8 +30,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 setError(null);
 
                 const nearbyCafes = await getNearbyCafes(
-                    -34.6000,
-                    -58.4000
+                    latitude,
+                    longitude
                 );
 
                 setCafes(nearbyCafes);
@@ -46,7 +49,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
         }
 
         loadNearbyCafes();
-    }, []);
+    }, [latitude, longitude]);
 
 
     const intentOption = cafeIntents.find(

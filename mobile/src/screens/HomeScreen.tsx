@@ -15,7 +15,7 @@ import { cafeIntents } from '../data/cafeIntents';
 import NearbyCafeCard from '../components/NearbyCafeCard';
 import { CafeSummary } from '../types/CafeSummary';
 import { getNearbyCafes } from '../services/api';
-import { getCurrentLocation } from '../services/location';
+import { getCurrentLocation, UserLocation } from '../services/location';
 
 type Props = NativeStackScreenProps<RootStackParamlist, 'Home'>;
 
@@ -25,6 +25,7 @@ export default function HomeScreen({navigation}: Props) {
   const [cafes, setCafes] = useState<CafeSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
 
   async function loadNearbyCafes() {
     try
@@ -42,6 +43,8 @@ export default function HomeScreen({navigation}: Props) {
 
         return;
       }
+
+      setUserLocation(location);
 
       const nearbyCafes = await getNearbyCafes(
         location.latitude,
@@ -95,11 +98,17 @@ export default function HomeScreen({navigation}: Props) {
               <TouchableOpacity
                   key={option.id}
                   style={styles.optionCard}
-                  onPress={() =>
+                  onPress={() => {
+                      if (!userLocation) {
+                          return;
+                      }
+
                       navigation.navigate('Results', {
                           intent: option.id,
-                      })
-                  }
+                          latitude: userLocation.latitude,
+                          longitude: userLocation.longitude,
+                      });
+                  }}
               >
                   <Text style={styles.optionIcon}>{option.icon}</Text>
                   <Text style={styles.optionText}>{option.label}</Text>
