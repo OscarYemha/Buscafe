@@ -15,6 +15,18 @@ const METERS_PER_KM = 1000;
 const PAGE_SIZE = 20;
 const MAX_PAGES = 3;
 
+const CAFE_TYPES = new Set([
+    'coffee_shop',
+    'cafe',
+    'cafeteria',
+]);
+
+function isCafe(place: GooglePlace): boolean {
+    return place.types?.some(
+        (type) => CAFE_TYPES.has(type)
+    ) ?? false;
+}
+
 async function searchCafesByText(
     latitude: number,
     longitude: number,
@@ -133,7 +145,10 @@ export async function searchAllCafesByText(
 
     const nearbyPlaces =
         uniquePlaces.filter((place) => {
-            if (!place.location) {
+            if (
+                !place.location ||
+                !isCafe(place)
+            ) {
                 return false;
             }
 
