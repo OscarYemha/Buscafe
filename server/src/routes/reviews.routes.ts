@@ -3,6 +3,22 @@ import prisma from "../lib/prisma";
 
 const router = Router();
 
+function isOptionalRating(value: unknown): boolean
+{
+    return value === undefined ||
+        (
+            Number.isInteger(value) &&
+            (value as number) >= 1 &&
+            (value as number) <= 5
+        );
+}
+
+function isOptionalBoolean(value: unknown): boolean
+{
+    return value === undefined ||
+        typeof value === 'boolean';
+}
+
 router.post('/', async (req, res) => {
     try
     {
@@ -10,18 +26,35 @@ router.post('/', async (req, res) => {
             userId,
             cafeId,
             rating,
-            comment
+            comment,
+            coffeeRating,
+            foodRating,
+            serviceRating,
+            comfortRating,
+            quietRating,
+            goodForWork,
+            goodForStudy,
+            goodForDate,
         } = req.body;
 
-        if (!Number.isInteger(userId) ||
-            userId < 0 ||
+        if (
+            !Number.isInteger(userId) ||
+            userId <= 0 ||
             !Number.isInteger(cafeId) ||
-            cafeId < 0 ||
+            cafeId <= 0 ||
             !Number.isInteger(rating) ||
             rating < 1 ||
             rating > 5 ||
             typeof comment !== 'string' ||
-            comment.trim() === ''
+            comment.trim() === '' ||
+            !isOptionalRating(coffeeRating) ||
+            !isOptionalRating(foodRating) ||
+            !isOptionalRating(serviceRating) ||
+            !isOptionalRating(comfortRating) ||
+            !isOptionalRating(quietRating) ||
+            !isOptionalBoolean(goodForWork) ||
+            !isOptionalBoolean(goodForStudy) ||
+            !isOptionalBoolean(goodForDate)
         )
         {
             return res.status(400).json({
@@ -61,6 +94,14 @@ router.post('/', async (req, res) => {
                 cafeId,
                 rating,
                 comment: comment.trim(),
+                coffeeRating,
+                foodRating,
+                serviceRating,
+                comfortRating,
+                quietRating,
+                goodForWork,
+                goodForStudy,
+                goodForDate,
             },
         });
 

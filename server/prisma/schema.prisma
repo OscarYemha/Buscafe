@@ -40,6 +40,16 @@ model Review {
   comment   String
   createdAt DateTime @default(now())
 
+  coffeeRating  Int?
+  foodRating    Int?
+  serviceRating Int?
+  comfortRating Int?
+  quietRating   Int?
+
+  goodForWork  Boolean?
+  goodForStudy Boolean?
+  goodForDate  Boolean?
+
   userId Int
   cafeId Int
 
