@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Prisma } from '../generated/prisma/client.js';
 import prisma from '../lib/prisma.js';
-import { searchNearbyCafes } from '../services/googlePlaces.js';
+import { searchAllCafesByText } from '../services/googlePlaces.js';
 import { mapGooglePlaceToCafeSummary } from '../services/cafeMapper.js';
 import { calculateDistanceKm } from '../utils/distance.js';
 import { getCafeStats } from '../services/cafeStats.js';
@@ -35,14 +35,16 @@ router.get('/nearby', async (req, res) => {
             });
         }
 
-        const googleResponse = await searchNearbyCafes(
-            latitude,
-            longitude
-        );
+        const googlePlaces =
+            await searchAllCafesByText(
+                latitude,
+                longitude
+            );
 
-        const mappedCafes = (googleResponse.places ?? [])
-            .map(mapGooglePlaceToCafeSummary)
-            .filter((cafe) => cafe !== null);
+        const mappedCafes =
+            googlePlaces
+                .map(mapGooglePlaceToCafeSummary)
+                .filter((cafe) => cafe !== null);
 
         const cafes = await Promise.all(
             mappedCafes.map(async (cafe) => {

@@ -13,7 +13,19 @@ export type GooglePlace = {
         longitude: number;
     };
 
+    types?: string[];
+
     primaryType?: string;
+
+    primaryTypeDisplayName?: {
+        text: string;
+        languageCode?: string;
+    };
+
+    googleMapsTypeLabel?: {
+        text: string;
+        languageCode?: string;
+    };
 
     rating?: number;
     userRatingCount?: number;
@@ -24,6 +36,7 @@ export type GooglePlace = {
     }
 };
 
-export type GoogleNearbySearchResponse = {
+export type GoogleTextSearchResponse = {
     places?: GooglePlace[];
+    nextPageToken?: string;
 };
