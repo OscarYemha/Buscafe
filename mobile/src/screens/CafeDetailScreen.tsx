@@ -1,42 +1,100 @@
-import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamlist } from "../navigation/AppNavigator";
-import { mockCafes } from "../data/mockCafes";
-import { cafeIntents } from "../data/cafeIntents";
+import {
+    Linking,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import {
+    useEffect,
+    useState,
+} from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+
+import { RootStackParamlist } from '../navigation/AppNavigator';
+import { getCafeDetails } from '../services/api';
+import { CafeDetail } from '../types/CafeDetail';
 import { priceLabels } from '../utils/price';
-import { useReviews } from "../context/ReviewsContext";
 
 type Props = NativeStackScreenProps<RootStackParamlist, 'CafeDetail'>;
 
 export default function CafeDetailScreen({ route, navigation }: Props) 
 {
-    const { cafeId } = route.params;
-    const { reviewsByCafe} = useReviews();
+    const { googlePlaceId } = route.params;
 
-    const cafe = mockCafes.find(
-        (cafe) => cafe.id === cafeId
-    );
+    const [cafe, setCafe] =
+        useState<CafeDetail | null>(null);
 
-    if(!cafe)
+    const [loading, setLoading] =
+        useState(true);
+
+    const [error, setError] =
+        useState<string | null>(null);
+
+    useEffect(() => {
+        async function loadCafe()
+        {
+            try
+            {
+                setLoading(true);
+                setError(null);
+
+                const cafeDetails =
+                    await getCafeDetails(
+                        googlePlaceId
+                    );
+
+                setCafe(cafeDetails);
+            }
+            catch (error)
+            {
+                console.error(error);
+
+                setError(
+                    'No se pudo cargar la cafetería'
+                );
+            }
+            finally
+            {
+                setLoading(false);
+            }
+        }
+
+        loadCafe();
+    }, [googlePlaceId]);
+
+    if (loading)
     {
         return (
             <SafeAreaView style={styles.container}>
                 <Text style={styles.title}>
-                    Cafetería no encontrada
+                    Cargando cafetería...
                 </Text>
             </SafeAreaView>
         );
     }
 
-    const cafeIntentOptions = cafe.intents
-        .map((intent) =>
-            cafeIntents.find((option) => option.id === intent)
-        )
-        .filter((option) => option !== undefined);
+    if (error || !cafe)
+    {
+        return (
+            <SafeAreaView style={styles.container}>
+                <Text style={styles.title}>
+                    {error ?? 'Cafetería no encontrada'}
+                </Text>
+            </SafeAreaView>
+        );
+    }
 
-
-    const priceLabel = priceLabels[cafe.priceLevel];
+    const priceLabel =
+        cafe.priceLevel !== null &&
+        cafe.priceLevel >= 1 &&
+        cafe.priceLevel <= 4
+            ? priceLabels[
+                cafe.priceLevel as keyof typeof priceLabels
+            ]
+            : null;
 
     const openDirections = () => {
         const address = encodeURIComponent(cafe.address);
@@ -45,13 +103,6 @@ export default function CafeDetailScreen({ route, navigation }: Props)
             `https://www.google.com/maps/search/?api=1&query=${address}`
         );
     };
-
-    const newReviews = reviewsByCafe[cafe.id] ?? [];
-
-    const allReviews = [
-        ...newReviews,
-        ...cafe.reviews,
-    ]
 
     return (
         <SafeAreaView style={styles.container}>
@@ -66,194 +117,137 @@ export default function CafeDetailScreen({ route, navigation }: Props)
                 <View style={styles.ratingsContainer}>
                     <View>
                         <Text style={styles.ratingLabel}>
-                        Google
+                            Google
                         </Text>
 
                         <Text style={styles.ratingValue}>
-                        ★ {cafe.googleRating} ({cafe.googleReviewsCount})
+                            {cafe.googleRating !== null
+                                ? `★ ${cafe.googleRating} (${cafe.googleReviewsCount})`
+                                : 'Sin valoraciones'}
                         </Text>
                     </View>
 
                     <View>
                         <Text style={styles.ratingLabel}>
-                        Comunidad Buscafé
+                            Comunidad BusCafé
                         </Text>
 
                         <Text style={styles.ratingValue}>
-                        {cafe.buscafeRating !== null
-                            ? `★ ${cafe.buscafeRating} (${cafe.buscafeReviewsCount})`
-                            : 'Sin valoraciones'}
+                            {cafe.buscafeRating !== null
+                                ? `★ ${cafe.buscafeRating.toFixed(1)} (${cafe.buscafeReviewsCount})`
+                                : 'Sin valoraciones'}
                         </Text>
                     </View>
                 </View>
 
                 <Text style={styles.summary}>
-                    Precios: {'$'.repeat(cafe.priceLevel)} · {priceLabel}
+                    {cafe.priceLevel !== null
+                        ? `Precios: ${'$'.repeat(cafe.priceLevel)}${priceLabel ? ` · ${priceLabel}` : ''}`
+                        : 'Precio no disponible'}
                 </Text>
 
                 <View style={styles.section}>
                     <Text
-                    style={[
-                        styles.status,
-                        cafe.isOpen ? styles.open : styles.closed,
-                    ]}
+                        style={[
+                            styles.status,
+                            cafe.isOpen === true
+                                ? styles.open
+                                : cafe.isOpen === false
+                                    ? styles.closed
+                                    : undefined,
+                        ]}
                     >
-                    {cafe.isOpen ? '● Abierto' : '● Cerrado'}
+                        {cafe.isOpen === true
+                            ? '● Abierto'
+                            : cafe.isOpen === false
+                                ? '● Cerrado'
+                                : 'Horario no disponible'}
                     </Text>
 
-                    <Text style={styles.info}>
-                    🕐 {cafe.hours}
-                    </Text>
-
-                    <Text style={styles.info}>
-                    📏 {cafe.distanceKm} km
-                    </Text>
-
-                    <Text style={styles.info}>
-                    📍 {cafe.address}
-                    </Text>
-                </View>
-
-
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>
-                    Características
-                    </Text>
-
-                    <View style={styles.tagsContainer}>
-                    {cafe.features.map((feature) => (
-                        <View
-                        key={feature}
-                        style={styles.tag}
-                        >
-                        <Text style={styles.tagText}>
-                            {feature}
-                        </Text>
-                        </View>
-                    ))}
-                    </View>
-                </View>
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>
-                        Ideal para
-                    </Text>
-
-                    <View style={styles.tagsContainer}>
-                        {cafeIntentOptions.map((option) => (
-                        <View
-                            key={option.id}
-                            style={styles.tag}
-                        >
-                            <Text style={styles.tagText}>
-                            {option.icon} {option.label}
+                    {cafe.currentOpeningHours.length > 0 && (
+                        <>
+                            <Text style={styles.sectionTitle}>
+                                Horarios
                             </Text>
-                        </View>
-                        ))}
-                    </View>
-                </View>
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>
-                        Reseñas de BusCafé
-                    </Text>
 
-                    {allReviews.length > 0 ? (
-                        allReviews.map((review) => (
-                            <View
-                                key={review.id}
-                                style={styles.reviewCard}
-                            >
-                                <View style={styles.reviewHeader}>
-                                    <Text style={styles.reviewUser}>
-                                        {review.userName}
+                            {cafe.currentOpeningHours.map(
+                                (hours) => (
+                                    <Text
+                                        key={hours}
+                                        style={styles.info}
+                                    >
+                                        🕐 {hours}
                                     </Text>
+                                )
+                            )}
+                        </>
+                    )}
 
-                                    <Text style={styles.reviewRating}>
-                                        ★ {review.rating}
-                                    </Text>
-                                </View>
-
-                                <Text style={styles.reviewComment}>
-                                    {review.comment}
-                                </Text>
-
-                                <Text style={styles.reviewDate}>
-                                    {review.date}
-                                </Text>
-                            </View>
-                        ))
-                    ) : (
-                        <Text style={styles.emptyReviews}>
-                            Todavía no hay reseñas en BusCafé.
+                    {cafe.distanceKm !== null && (
+                        <Text style={styles.info}>
+                            📏 {cafe.distanceKm.toFixed(2)} km
                         </Text>
                     )}
+
+                    <Text style={styles.info}>
+                        📍 {cafe.address}
+                    </Text>
                 </View>
-                <TouchableOpacity style={styles.addReviewButton}>
-                    <Text
-                        style={styles.addReviewButtonText}
-                        onPress={() =>
-                            navigation.navigate('AddReview', {
-                                cafeId: cafe.id,
-                            })
-                        }
-                    >
-                        ✍️ Escribir una reseña
-                    </Text>
-                </TouchableOpacity>
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>
-                        Contacto
-                    </Text>
 
-                    <View style={styles.contactContainer}>
-                        {cafe.website && (
-                            <TouchableOpacity
-                                style={styles.contactButton}
-                                onPress={() => Linking.openURL(cafe.website!)}
-                            >
-                                <Text style={styles.contactButtonText}>
-                                    🌐 Sitio web
-                                </Text>
-                            </TouchableOpacity>
-                        )}
+                {(cafe.website ||
+                    cafe.phone ||
+                    cafe.googleMapsUrl) && (
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>
+                            Contacto
+                        </Text>
 
-                        {cafe.instagram && (
-                            <TouchableOpacity
-                                style={styles.contactButton}
-                                onPress={() => Linking.openURL(cafe.instagram!)}
-                            >
-                                <Text style={styles.contactButtonText}>
-                                    📷 Instagram
-                                </Text>
-                            </TouchableOpacity>
-                        )}
+                        <View style={styles.contactContainer}>
+                            {cafe.website && (
+                                <TouchableOpacity
+                                    style={styles.contactButton}
+                                    onPress={() =>
+                                        Linking.openURL(cafe.website!)
+                                    }
+                                >
+                                    <Text style={styles.contactButtonText}>
+                                        🌐 Sitio web
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
 
-                        {cafe.phone && (
-                            <TouchableOpacity
-                                style={styles.contactButton}
-                                onPress={() => Linking.openURL(`tel:${cafe.phone}`)}
-                            >
-                                <Text style={styles.contactButtonText}>
-                                    📞 Llamar
-                                </Text>
-                            </TouchableOpacity>
-                        )}
+                            {cafe.phone && (
+                                <TouchableOpacity
+                                    style={styles.contactButton}
+                                    onPress={() =>
+                                        Linking.openURL(
+                                            `tel:${cafe.phone}`
+                                        )
+                                    }
+                                >
+                                    <Text style={styles.contactButtonText}>
+                                        📞 Llamar
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
 
-                        {cafe.whatsapp && (
-                            <TouchableOpacity
-                                style={styles.contactButton}
-                                onPress={() =>
-                                    Linking.openURL(
-                                        `https://wa.me/${cafe.whatsapp!.replace(/\D/g, '')}`
-                                    )
-                                }
-                            >
-                                <Text style={styles.contactButtonText}>
-                                    💬 WhatsApp
-                                </Text>
-                            </TouchableOpacity>
-                        )}
+                            {cafe.googleMapsUrl && (
+                                <TouchableOpacity
+                                    style={styles.contactButton}
+                                    onPress={() =>
+                                        Linking.openURL(
+                                            cafe.googleMapsUrl!
+                                        )
+                                    }
+                                >
+                                    <Text style={styles.contactButtonText}>
+                                        🗺️ Google Maps
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
                     </View>
-                </View>
+                )}
                 <TouchableOpacity 
                 style={styles.directionsButton}
                 onPress={openDirections}

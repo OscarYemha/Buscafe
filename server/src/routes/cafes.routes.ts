@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import { Prisma } from '../generated/prisma/client.js';
 import prisma from '../lib/prisma.js';
-import { searchAllCafesByText } from '../services/googlePlaces.js';
+import { getPlaceDetails, searchAllCafesByText } from '../services/googlePlaces.js';
 import { mapGooglePlaceToCafeSummary } from '../services/cafeMapper.js';
 import { calculateDistanceKm } from '../utils/distance.js';
 import { getCafeStats } from '../services/cafeStats.js';
+import { error } from 'node:console';
 
 const router = Router();
 
@@ -93,6 +94,68 @@ router.get('/nearby', async (req, res) => {
 
         return res.status(500).json({
             error: 'No se pudieron obtener las cafeterías cercanas',
+        });
+    }
+});
+
+router.get('/place/:googlePlaceId', async (req, res) => {
+    try
+    {
+        const googlePlaceId = req.params.googlePlaceId;
+
+        if (typeof googlePlaceId !== 'string' || googlePlaceId.trim() === '')
+        {
+            return res.status(400).json({
+                error: 'El ID de Google Places es inválido',
+            });
+        }
+
+        const googlePlace = await getPlaceDetails(googlePlaceId);
+
+        const cafe = mapGooglePlaceToCafeSummary(googlePlace);
+
+        if (!cafe)
+        {
+            return res.status(404).json({
+                error: 'No se pudo obtener la cafetería',
+            });
+        }
+
+        const stats = await getCafeStats(googlePlaceId);
+
+        return res.json({
+            ...cafe,
+
+            buscafeRating:
+                stats.rating,
+
+            buscafeReviewsCount:
+                stats.reviewsCount,
+
+            currentOpeningHours:
+                googlePlace.currentOpeningHours
+                    ?.weekdayDescriptions ?? [],
+
+            regularOpeningHours:
+                googlePlace.regularOpeningHours
+                    ?.weekdayDescriptions ?? [],
+
+            website:
+                googlePlace.websiteUri ?? null,
+
+            phone:
+                googlePlace.nationalPhoneNumber ?? null,
+
+            googleMapsUrl:
+                googlePlace.googleMapsUri ?? null,
+        });
+    }
+    catch (error)
+    {
+        console.error(error);
+
+        return res.status(500).json({
+            error: 'No se pudo obtener el detalle de la cafetería',
         });
     }
 });

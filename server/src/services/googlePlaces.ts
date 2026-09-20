@@ -9,6 +9,7 @@ import {
 
 
 const GOOGLE_TEXT_SEARCH_URL = 'https://places.googleapis.com/v1/places:searchText';
+const GOOGLE_PLACE_DETAILS_URL = 'https://places.googleapis.com/v1/places';
 
 const SEARCH_RADIUS_KM = 1;
 const METERS_PER_KM = 1000;
@@ -164,4 +165,60 @@ export async function searchAllCafesByText(
         });
 
     return nearbyPlaces;
+}
+
+export async function getPlaceDetails(
+    googlePlaceId: string
+): Promise<GooglePlace> {
+    const apiKey =
+        process.env.GOOGLE_PLACES_API_KEY;
+
+    if (!apiKey) {
+        throw new Error(
+            'GOOGLE_PLACES_API_KEY no está definida'
+        );
+    }
+
+    const response = await fetch(
+        `${GOOGLE_PLACE_DETAILS_URL}/${encodeURIComponent(googlePlaceId)}`,
+        {
+            method: 'GET',
+            headers: {
+                'X-Goog-Api-Key': apiKey,
+                'X-Goog-FieldMask': [
+                    'id',
+                    'displayName',
+                    'formattedAddress',
+                    'location',
+                    'types',
+                    'primaryType',
+                    'primaryTypeDisplayName',
+                    'googleMapsTypeLabel',
+                    'rating',
+                    'userRatingCount',
+                    'priceLevel',
+                    'currentOpeningHours',
+                    'regularOpeningHours',
+                    'websiteUri',
+                    'nationalPhoneNumber',
+                    'googleMapsUri',
+                ].join(','),
+            },
+        }
+    );
+
+    if (!response.ok) {
+        const errorBody =
+            await response.text();
+
+        throw new Error(
+            `Error de Google Place Details: ` +
+            `${response.status} ${errorBody}`
+        );
+    }
+
+    const place: GooglePlace =
+        await response.json();
+
+    return place;
 }

@@ -150,10 +150,9 @@ export default function HomeScreen({navigation}: Props) {
                 key={cafe.googlePlaceId}
                 cafe={cafe}
                 onPress={() => {
-                  console.log(
-                    'Cafetería seleccionada:',
-                    cafe.name
-                  );
+                    navigation.navigate('CafeDetail', {
+                        googlePlaceId: cafe.googlePlaceId,
+                    });
                 }}
               />
             ))}

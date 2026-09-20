@@ -15,7 +15,7 @@ export type RootStackParamlist = {
         longitude: number;
     };
     CafeDetail: {
-        cafeId: string;
+        googlePlaceId: string;
     };
     AddReview: {
         cafeId: string;

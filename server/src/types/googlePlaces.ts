@@ -33,7 +33,19 @@ export type GooglePlace = {
 
     currentOpeningHours?: {
         openNow?: boolean;
-    }
+        weekdayDescriptions?: string[];
+    };
+
+    regularOpeningHours?: {
+        openNow?: boolean;
+        weekdayDescriptions?: string[];
+    };
+
+    websiteUri?: string;
+
+    nationalPhoneNumber?: string;
+
+    googleMapsUri?: string;
 };
 
 export type GoogleTextSearchResponse = {
