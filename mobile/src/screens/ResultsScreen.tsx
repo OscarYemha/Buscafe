@@ -52,13 +52,15 @@ export default function ResultsScreen({ route, navigation }: Props) {
     }, [latitude, longitude]);
 
 
-    const intentOption = cafeIntents.find(
+    const intentOption = intent
+        ? cafeIntents.find(
         (option) => option.id === intent
-    );
+    )
+    : undefined;
 
     const title = intentOption
         ? `Cafés para ${intentOption.description}`
-        : 'Cafeterías';
+        : 'Cafés cerca de vos';
 
     return (
         <SafeAreaView style={styles.container}>

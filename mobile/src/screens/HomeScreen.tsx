@@ -145,7 +145,7 @@ export default function HomeScreen({navigation}: Props) {
 
         {!loading && !error && (
           <View style={styles.cafesContainer}>
-            {cafes.map((cafe) => (
+            {cafes.slice(0, 5).map((cafe) => (
               <NearbyCafeCard
                 key={cafe.googlePlaceId}
                 cafe={cafe}
@@ -159,7 +159,21 @@ export default function HomeScreen({navigation}: Props) {
             ))}
           </View>
         )}
-
+        {!loading && !error && cafes.length > 5 && userLocation && (
+          <TouchableOpacity
+            style={styles.showAllButton}
+            onPress={() => {
+              navigation.navigate('Results', {
+                latitude: userLocation.latitude,
+                longitude: userLocation.longitude,
+              });
+            }}
+          >
+            <Text style={styles.showAllButtonText}>
+              Ver todos
+            </Text>
+          </TouchableOpacity>
+        )}
         {!loading && !error && cafes.length > 0 && (
           <TouchableOpacity
             style={styles.mapButton}
@@ -307,5 +321,17 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+
+  showAllButton: {
+    marginTop: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+
+  showAllButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#6B3A22',
   },
 });

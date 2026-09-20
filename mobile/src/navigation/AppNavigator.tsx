@@ -10,7 +10,7 @@ import LoginScreen from "../screens/LoginScreen";
 export type RootStackParamlist = {
     Home: undefined;
     Results: {
-        intent: CafeIntent;
+        intent?: CafeIntent;
         latitude: number;
         longitude: number;
     };
