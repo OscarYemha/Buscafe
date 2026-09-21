@@ -180,7 +180,8 @@ export async function getPlaceDetails(
     }
 
     const response = await fetch(
-        `${GOOGLE_PLACE_DETAILS_URL}/${encodeURIComponent(googlePlaceId)}`,
+        `${GOOGLE_PLACE_DETAILS_URL}/${encodeURIComponent(googlePlaceId)}` +
+        `?languageCode=es&regionCode=AR`,
         {
             method: 'GET',
             headers: {

@@ -7,9 +7,10 @@ import {
     View,
 } from 'react-native';
 import {
-    useEffect,
+    useCallback,
     useState,
 } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -33,37 +34,39 @@ export default function CafeDetailScreen({ route, navigation }: Props)
     const [error, setError] =
         useState<string | null>(null);
 
-    useEffect(() => {
-        async function loadCafe()
-        {
-            try
+    useFocusEffect(
+        useCallback(() => {
+            async function loadCafe()
             {
-                setLoading(true);
-                setError(null);
+                try
+                {
+                    setLoading(true);
+                    setError(null);
 
-                const cafeDetails =
-                    await getCafeDetails(
-                        googlePlaceId
+                    const cafeDetails =
+                        await getCafeDetails(
+                            googlePlaceId
+                        );
+
+                    setCafe(cafeDetails);
+                }
+                catch (error)
+                {
+                    console.error(error);
+
+                    setError(
+                        'No se pudo cargar la cafetería'
                     );
-
-                setCafe(cafeDetails);
+                }
+                finally
+                {
+                    setLoading(false);
+                }
             }
-            catch (error)
-            {
-                console.error(error);
 
-                setError(
-                    'No se pudo cargar la cafetería'
-                );
-            }
-            finally
-            {
-                setLoading(false);
-            }
-        }
-
-        loadCafe();
-    }, [googlePlaceId]);
+            loadCafe();
+        }, [googlePlaceId])
+    );
 
     if (loading)
     {
@@ -176,7 +179,7 @@ export default function CafeDetailScreen({ route, navigation }: Props)
                                         key={hours}
                                         style={styles.info}
                                     >
-                                        🕐 {hours}
+                                        🕐 {hours.charAt(0).toUpperCase() + hours.slice(1)}
                                     </Text>
                                 )
                             )}
@@ -193,7 +196,69 @@ export default function CafeDetailScreen({ route, navigation }: Props)
                         📍 {cafe.address}
                     </Text>
                 </View>
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>
+                        Reseñas de BusCafé
+                    </Text>
 
+                    {cafe.buscafeReviews.length > 0 ? (
+                        cafe.buscafeReviews.map((review) => (
+                            <View
+                                key={review.id}
+                                style={styles.reviewCard}
+                            >
+                                <View style={styles.reviewHeader}>
+                                    <Text style={styles.reviewUser}>
+                                        {review.user.name}
+                                    </Text>
+
+                                    <Text style={styles.reviewRating}>
+                                        ★ {review.rating}
+                                    </Text>
+                                </View>
+
+                                <Text style={styles.reviewComment}>
+                                    {review.comment}
+                                </Text>
+
+                                <Text style={styles.reviewDate}>
+                                    {new Date(
+                                        review.createdAt
+                                    ).toLocaleDateString('es-AR')}
+                                </Text>
+                            </View>
+                        ))
+                    ) : (
+                        <Text style={styles.emptyReviews}>
+                            Todavía no hay reseñas en BusCafé.
+                        </Text>
+                    )}
+                </View>
+                <TouchableOpacity
+                    style={styles.addReviewButton}
+                    onPress={() =>
+                        navigation.navigate('AddReview', {
+                            googlePlaceId:
+                                cafe.googlePlaceId,
+
+                            cafeName:
+                                cafe.name,
+
+                            cafeAddress:
+                                cafe.address,
+
+                            cafeLatitude:
+                                cafe.latitude,
+
+                            cafeLongitude:
+                                cafe.longitude,
+                        })
+                    }
+                >
+                    <Text style={styles.addReviewButtonText}>
+                        ✍️ Escribir una reseña
+                    </Text>
+                </TouchableOpacity>
                 {(cafe.website ||
                     cafe.phone ||
                     cafe.googleMapsUrl) && (

@@ -24,7 +24,13 @@ router.post('/', async (req, res) => {
     {
         const {
             userId,
-            cafeId,
+            
+            googlePlaceId,
+            cafeName,
+            cafeAddress,
+            cafeLatitude,
+            cafeLongitude,
+
             rating,
             comment,
             coffeeRating,
@@ -40,8 +46,16 @@ router.post('/', async (req, res) => {
         if (
             !Number.isInteger(userId) ||
             userId <= 0 ||
-            !Number.isInteger(cafeId) ||
-            cafeId <= 0 ||
+            typeof googlePlaceId !== 'string' ||
+            googlePlaceId.trim() === '' ||
+            typeof cafeName !== 'string' ||
+            cafeName.trim() === '' ||
+            typeof cafeAddress !== 'string' ||
+            cafeAddress.trim() === '' ||
+            typeof cafeLatitude !== 'number' ||
+            !Number.isFinite(cafeLatitude) ||
+            typeof cafeLongitude !== 'number' ||
+            !Number.isFinite(cafeLongitude) ||
             !Number.isInteger(rating) ||
             rating < 1 ||
             rating > 5 ||
@@ -75,23 +89,48 @@ router.post('/', async (req, res) => {
             });
         }
 
-        const cafe = await prisma.cafe.findUnique({
+        const cafe = await prisma.cafe.upsert({
             where: {
-                id: cafeId,
+                googlePlaceId:
+                    googlePlaceId.trim(),
+            },
+
+            update: {
+                name:
+                    cafeName.trim(),
+
+                address:
+                    cafeAddress.trim(),
+
+                latitude:
+                    cafeLatitude,
+
+                longitude:
+                    cafeLongitude,
+            },
+
+            create: {
+                googlePlaceId:
+                    googlePlaceId.trim(),
+
+                name:
+                    cafeName.trim(),
+
+                address:
+                    cafeAddress.trim(),
+
+                latitude:
+                    cafeLatitude,
+
+                longitude:
+                    cafeLongitude,
             },
         });
-
-        if (!cafe)
-        {
-            return res.status(404).json({
-                error: 'Cafetería no encontrada',
-            });
-        }
 
         const review = await prisma.review.create({
             data: {
                 userId,
-                cafeId,
+                cafeId: cafe.id,
                 rating,
                 comment: comment.trim(),
                 coffeeRating,

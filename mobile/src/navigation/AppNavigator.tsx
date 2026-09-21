@@ -18,7 +18,11 @@ export type RootStackParamlist = {
         googlePlaceId: string;
     };
     AddReview: {
-        cafeId: string;
+        googlePlaceId: string;
+        cafeName: string;
+        cafeAddress: string;
+        cafeLatitude: number;
+        cafeLongitude: number;
     };
     Login: undefined;
 }

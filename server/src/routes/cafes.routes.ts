@@ -132,6 +132,9 @@ router.get('/place/:googlePlaceId', async (req, res) => {
             buscafeReviewsCount:
                 stats.reviewsCount,
 
+            buscafeReviews:
+                stats.reviews,
+
             currentOpeningHours:
                 googlePlace.currentOpeningHours
                     ?.weekdayDescriptions ?? [],

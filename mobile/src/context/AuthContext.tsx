@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useContext, useState } from "react";
 
 type User = {
-    id: string;
+    id: number;
     name: string;
     email: string;
 };
@@ -22,7 +22,7 @@ export function AuthProvider({children, }: {children: ReactNode})
 
     const login = () => {
         setUser({
-            id: 'user-1',
+            id: 1,
             name: 'Usuario de prueba',
             email: 'usuario@buscafe.com',
         });

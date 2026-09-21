@@ -54,3 +54,50 @@ export async function getCafeDetails(
 
     return response.json();
 }
+
+export type CreateReviewData = {
+    userId: number;
+
+    googlePlaceId: string;
+    cafeName: string;
+    cafeAddress: string;
+    cafeLatitude: number;
+    cafeLongitude: number;
+
+    rating: number;
+    comment: string;
+
+    coffeeRating?: number;
+    foodRating?: number;
+    serviceRating?: number;
+    comfortRating?: number;
+    quietRating?: number;
+
+    goodForWork?: boolean;
+    goodForStudy?: boolean;
+    goodForDate?: boolean;
+};
+
+export async function createReview(
+    data: CreateReviewData
+) {
+    const response = await fetch(
+        `${API_URL}/reviews`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        }
+    );
+
+    if (!response.ok)
+    {
+        throw new Error(
+            'No se pudo publicar la reseña'
+        );
+    }
+
+    return response.json();
+}

@@ -1,13 +1,10 @@
 import { StyleSheet, Text, TextInput,TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-
 import { RootStackParamlist } from '../navigation/AppNavigator';
-import { mockCafes } from '../data/mockCafes';
-
 import { useReviewDraft } from '../context/ReviewDraftContext';
 import { useAuth } from '../context/AuthContext';
-import { useReviews } from '../context/ReviewsContext';
+import { createReview } from '../services/api';
 
 type Props = NativeStackScreenProps<
     RootStackParamlist,
@@ -15,27 +12,18 @@ type Props = NativeStackScreenProps<
 >;
 
 export default function AddReviewScreen({ route, navigation }: Props) {
-    const { cafeId } = route.params;
-
-    const cafe = mockCafes.find(
-        (cafe) => cafe.id === cafeId
-    );
-
-    if (!cafe) {
-        return (
-            <SafeAreaView style={styles.container}>
-                <Text style={styles.title}>
-                    Cafetería no encontrada
-                </Text>
-            </SafeAreaView>
-        );
-    }
+    const {
+        googlePlaceId,
+        cafeName,
+        cafeAddress,
+        cafeLatitude,
+        cafeLongitude,
+    } = route.params;
 
     const {draft, setDraft, clearDraft} = useReviewDraft();
     const {user, isAuthenticated} = useAuth();
-    const { addReview } = useReviews();
 
-    const isCurrentCafeDraft = draft.cafeId === cafe.id;
+    const isCurrentCafeDraft = draft.cafeId === googlePlaceId;
 
     const rating = isCurrentCafeDraft
         ? draft.rating
@@ -48,7 +36,7 @@ export default function AddReviewScreen({ route, navigation }: Props) {
     const canSubmit =
         rating > 0 && comment.trim().length > 0;
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!canSubmit)
         {
             return;
@@ -60,23 +48,38 @@ export default function AddReviewScreen({ route, navigation }: Props) {
             return;
         }
 
-        addReview(cafe.id, {
-            id: Date.now().toString(),
-            userName: user.name,
-            rating,
-            comment: comment.trim(),
-            date: new Date().toISOString().split('T')[0]
-        })
+        try
+        {
+            await createReview({
+                userId: user.id,
 
-        clearDraft();
-        navigation.goBack();
+                googlePlaceId,
+                cafeName,
+                cafeAddress,
+                cafeLatitude,
+                cafeLongitude,
+
+                rating,
+                comment: comment.trim(),
+            });
+
+            clearDraft();
+            navigation.goBack();
+        }
+        catch (error)
+        {
+            console.error(
+                'Error al publicar la reseña:',
+                error
+            );
+        }
     };
 
     return (
         <SafeAreaView style={styles.container}>
             <View>
                 <Text style={styles.title}>
-                    Reseñar {cafe.name}
+                    Reseñar {cafeName}
                 </Text>
 
                 <Text style={styles.description}>
@@ -93,7 +96,7 @@ export default function AddReviewScreen({ route, navigation }: Props) {
                                 key={star}
                                 onPress={() => 
                                     setDraft({
-                                        cafeId: cafe.id,
+                                        cafeId: googlePlaceId,
                                         rating: star,
                                         comment: isCurrentCafeDraft
                                             ? draft.comment
@@ -118,7 +121,7 @@ export default function AddReviewScreen({ route, navigation }: Props) {
                         value={comment}
                         onChangeText={(text) =>
                             setDraft({
-                                cafeId: cafe.id,
+                                cafeId: googlePlaceId,
                                 rating: isCurrentCafeDraft
                                     ? draft.rating
                                     : 0,
