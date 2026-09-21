@@ -220,7 +220,69 @@ export default function CafeDetailScreen({ route, navigation }: Props)
                                 <Text style={styles.reviewComment}>
                                     {review.comment}
                                 </Text>
+                                <View style={styles.reviewDetails}>
+                                    {review.coffeeRating !== null && (
+                                        <Text style={styles.reviewDetail}>
+                                            ☕ Café: {'★'.repeat(review.coffeeRating)}
+                                        </Text>
+                                    )}
 
+                                    {review.foodRating !== null && (
+                                        <Text style={styles.reviewDetail}>
+                                            🍰 Comida: {'★'.repeat(review.foodRating)}
+                                        </Text>
+                                    )}
+
+                                    {review.serviceRating !== null && (
+                                        <Text style={styles.reviewDetail}>
+                                            🤝 Servicio: {'★'.repeat(review.serviceRating)}
+                                        </Text>
+                                    )}
+
+                                    {review.comfortRating !== null && (
+                                        <Text style={styles.reviewDetail}>
+                                            🪑 Comodidad: {'★'.repeat(review.comfortRating)}
+                                        </Text>
+                                    )}
+
+                                    {review.quietRating !== null && (
+                                        <Text style={styles.reviewDetail}>
+                                            🔇 Tranquilidad: {'★'.repeat(review.quietRating)}
+                                        </Text>
+                                    )}
+
+                                    {(
+                                        review.goodForWork === true ||
+                                        review.goodForStudy === true ||
+                                        review.goodForDate === true
+                                    ) && (
+                                        <View style={styles.reviewRecommendations}>
+                                            <Text style={styles.reviewRecommendationsTitle}>
+                                                Ideal para
+                                            </Text>
+
+                                            <View style={styles.reviewRecommendationTags}>
+                                                {review.goodForWork === true && (
+                                                    <Text style={styles.reviewRecommendationTag}>
+                                                        💻 Trabajar
+                                                    </Text>
+                                                )}
+
+                                                {review.goodForStudy === true && (
+                                                    <Text style={styles.reviewRecommendationTag}>
+                                                        📚 Estudiar
+                                                    </Text>
+                                                )}
+
+                                                {review.goodForDate === true && (
+                                                    <Text style={styles.reviewRecommendationTag}>
+                                                        ❤️ Cita
+                                                    </Text>
+                                                )}
+                                            </View>
+                                        </View>
+                                    )}
+                                </View>
                                 <Text style={styles.reviewDate}>
                                     {new Date(
                                         review.createdAt
@@ -507,6 +569,42 @@ const styles = StyleSheet.create({
     addReviewButtonText: {
         fontSize: 14,
         fontWeight: '600',
+        color: '#6B3A22',
+    },
+
+    reviewDetails: {
+        marginTop: 10,
+        gap: 4,
+    },
+
+    reviewDetail: {
+        fontSize: 13,
+        color: '#6B3A22',
+    },
+
+    reviewRecommendations: {
+        marginTop: 10,
+    },
+
+    reviewRecommendationsTitle: {
+        marginBottom: 6,
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#7A6254',
+    },
+
+    reviewRecommendationTags: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 6,
+    },
+
+    reviewRecommendationTag: {
+        paddingHorizontal: 8,
+        paddingVertical: 5,
+        borderRadius: 10,
+        backgroundColor: '#F3E4C8',
+        fontSize: 12,
         color: '#6B3A22',
     },
 });
