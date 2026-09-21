@@ -196,6 +196,81 @@ export default function CafeDetailScreen({ route, navigation }: Props)
                         📍 {cafe.address}
                     </Text>
                 </View>
+                {(
+                    cafe.coffeeRating !== null ||
+                    cafe.foodRating !== null ||
+                    cafe.serviceRating !== null ||
+                    cafe.comfortRating !== null ||
+                    cafe.quietRating !== null
+                ) && (
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>
+                            Valoraciones de la comunidad
+                        </Text>
+
+                        {cafe.coffeeRating !== null && (
+                            <Text style={styles.communityRating}>
+                                ☕ Café: {cafe.coffeeRating.toFixed(1)} / 5
+                            </Text>
+                        )}
+
+                        {cafe.foodRating !== null && (
+                            <Text style={styles.communityRating}>
+                                🍰 Comida: {cafe.foodRating.toFixed(1)} / 5
+                            </Text>
+                        )}
+
+                        {cafe.serviceRating !== null && (
+                            <Text style={styles.communityRating}>
+                                🤝 Servicio: {cafe.serviceRating.toFixed(1)} / 5
+                            </Text>
+                        )}
+
+                        {cafe.comfortRating !== null && (
+                            <Text style={styles.communityRating}>
+                                🪑 Comodidad: {cafe.comfortRating.toFixed(1)} / 5
+                            </Text>
+                        )}
+
+                        {cafe.quietRating !== null && (
+                            <Text style={styles.communityRating}>
+                                🔇 Tranquilidad: {cafe.quietRating.toFixed(1)} / 5
+                            </Text>
+                        )}
+
+                        {(
+                        cafe.goodForWorkCount > 0 ||
+                        cafe.goodForStudyCount > 0 ||
+                        cafe.goodForDateCount > 0
+                    ) && (
+                        <View style={styles.communityRecommendations}>
+                            <Text style={styles.communityRecommendationsTitle}>
+                                Ideal para
+                            </Text>
+
+                            <View style={styles.communityRecommendationTags}>
+                                {cafe.goodForWorkCount > 0 && (
+                                    <Text style={styles.communityRecommendationTag}>
+                                        💻 Trabajar   👤👤 {cafe.goodForWorkCount}
+                                    </Text>
+                                )}
+
+                                {cafe.goodForStudyCount > 0 && (
+                                    <Text style={styles.communityRecommendationTag}>
+                                        📚 Estudiar   👤👤 {cafe.goodForStudyCount}
+                                    </Text>
+                                )}
+
+                                {cafe.goodForDateCount > 0 && (
+                                    <Text style={styles.communityRecommendationTag}>
+                                        ❤️ Cita   👤👤 {cafe.goodForDateCount}
+                                    </Text>
+                                )}
+                            </View>
+                        </View>
+                    )}
+                    </View>
+                )}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>
                         Reseñas de BusCafé
@@ -606,5 +681,37 @@ const styles = StyleSheet.create({
         backgroundColor: '#F3E4C8',
         fontSize: 12,
         color: '#6B3A22',
+    },
+
+    communityRating: {
+        marginTop: 6,
+        fontSize: 15,
+        color: '#6B3A22',
+    },
+
+    communityRecommendations: {
+        marginTop: 18,
+    },
+
+    communityRecommendationsTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#6B3A22',
+        marginBottom: 8,
+    },
+
+    communityRecommendationTags: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    },
+
+    communityRecommendationTag: {
+        backgroundColor: '#F3E4C5',
+        color: '#6B3A22',
+        paddingHorizontal: 12,
+        paddingVertical: 7,
+        borderRadius: 16,
+        fontSize: 14,
     },
 });

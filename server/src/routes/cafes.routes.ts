@@ -135,6 +135,39 @@ router.get('/place/:googlePlaceId', async (req, res) => {
             buscafeReviews:
                 stats.reviews,
 
+            coffeeRating:
+                stats.coffeeRating,
+
+            foodRating:
+                stats.foodRating,
+
+            serviceRating:
+                stats.serviceRating,
+
+            comfortRating:
+                stats.comfortRating,
+
+            quietRating:
+                stats.quietRating,
+
+            goodForWorkPercentage:
+                stats.goodForWorkPercentage,
+
+            goodForStudyPercentage:
+                stats.goodForStudyPercentage,
+
+            goodForDatePercentage:
+                stats.goodForDatePercentage,
+
+            goodForWorkCount:
+                stats.goodForWorkCount,
+
+            goodForStudyCount:
+                stats.goodForStudyCount,
+
+            goodForDateCount:
+                stats.goodForDateCount,
+
             currentOpeningHours:
                 googlePlace.currentOpeningHours
                     ?.weekdayDescriptions ?? [],

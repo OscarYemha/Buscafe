@@ -25,6 +25,20 @@ export type CafeReview = {
 export type CafeDetail = CafeSummary & {
     buscafeReviews: CafeReview[];
 
+    coffeeRating: number | null;
+    foodRating: number | null;
+    serviceRating: number | null;
+    comfortRating: number | null;
+    quietRating: number | null;
+
+    goodForWorkPercentage: number | null;
+    goodForStudyPercentage: number | null;
+    goodForDatePercentage: number | null;
+
+    goodForWorkCount: number;
+    goodForStudyCount: number;
+    goodForDateCount: number;
+
     currentOpeningHours: string[];
     regularOpeningHours: string[];
 
