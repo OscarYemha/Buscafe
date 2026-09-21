@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TextInput,TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput,TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamlist } from '../navigation/AppNavigator';
@@ -33,8 +33,259 @@ export default function AddReviewScreen({ route, navigation }: Props) {
         ? draft.comment
         : '';
 
+    const coffeeRating = isCurrentCafeDraft
+        ? draft.coffeeRating
+        : null;
+
+    const foodRating = isCurrentCafeDraft
+        ? draft.foodRating
+        : null;
+
+    const serviceRating = isCurrentCafeDraft
+        ? draft.serviceRating
+        : null;
+
+    const comfortRating = isCurrentCafeDraft
+        ? draft.comfortRating
+        : null;
+
+    const quietRating = isCurrentCafeDraft
+        ? draft.quietRating
+        : null;
+
+    const goodForWork = isCurrentCafeDraft
+        ? draft.goodForWork
+        : null;
+
+    const goodForStudy = isCurrentCafeDraft
+        ? draft.goodForStudy
+        : null;
+
+    const goodForDate = isCurrentCafeDraft
+        ? draft.goodForDate
+        : null;
+
     const canSubmit =
         rating > 0 && comment.trim().length > 0;
+
+    const updateSpecificRating = (
+        field:
+            | 'coffeeRating'
+            | 'foodRating'
+            | 'serviceRating'
+            | 'comfortRating'
+            | 'quietRating',
+        value: number
+        ) => {
+            setDraft({
+                cafeId: googlePlaceId,
+
+                rating: isCurrentCafeDraft
+                    ? draft.rating
+                    : 0,
+
+                comment: isCurrentCafeDraft
+                    ? draft.comment
+                    : '',
+
+                coffeeRating: isCurrentCafeDraft
+                    ? draft.coffeeRating
+                    : null,
+
+                foodRating: isCurrentCafeDraft
+                    ? draft.foodRating
+                    : null,
+
+                serviceRating: isCurrentCafeDraft
+                    ? draft.serviceRating
+                    : null,
+
+                comfortRating: isCurrentCafeDraft
+                    ? draft.comfortRating
+                    : null,
+
+                quietRating: isCurrentCafeDraft
+                    ? draft.quietRating
+                    : null,
+
+                [field]: value,
+
+                goodForWork: isCurrentCafeDraft
+                    ? draft.goodForWork
+                    : null,
+
+                goodForStudy: isCurrentCafeDraft
+                    ? draft.goodForStudy
+                    : null,
+
+                goodForDate: isCurrentCafeDraft
+                    ? draft.goodForDate
+                    : null,
+        });
+    };
+
+    const updateRecommendation = (
+        field:
+            | 'goodForWork'
+            | 'goodForStudy'
+            | 'goodForDate',
+        value: boolean | null
+    ) => {
+        setDraft({
+            ...draft,
+
+            cafeId: googlePlaceId,
+
+            rating: isCurrentCafeDraft
+                ? draft.rating
+                : 0,
+
+            comment: isCurrentCafeDraft
+                ? draft.comment
+                : '',
+
+            coffeeRating: isCurrentCafeDraft
+                ? draft.coffeeRating
+                : null,
+
+            foodRating: isCurrentCafeDraft
+                ? draft.foodRating
+                : null,
+
+            serviceRating: isCurrentCafeDraft
+                ? draft.serviceRating
+                : null,
+
+            comfortRating: isCurrentCafeDraft
+                ? draft.comfortRating
+                : null,
+
+            quietRating: isCurrentCafeDraft
+                ? draft.quietRating
+                : null,
+
+            goodForWork: isCurrentCafeDraft
+                ? draft.goodForWork
+                : null,
+
+            goodForStudy: isCurrentCafeDraft
+                ? draft.goodForStudy
+                : null,
+
+            goodForDate: isCurrentCafeDraft
+                ? draft.goodForDate
+                : null,
+
+            [field]: value,
+        });
+    };
+
+    const renderRecommendation = (
+        label: string,
+        field:
+            | 'goodForWork'
+            | 'goodForStudy'
+            | 'goodForDate',
+        value: boolean | null
+    ) => {
+        return (
+            <View style={styles.recommendationRow}>
+                <Text style={styles.recommendationLabel}>
+                    {label}
+                </Text>
+
+                <View style={styles.recommendationOptions}>
+                    <TouchableOpacity
+                        style={[
+                            styles.recommendationButton,
+                            value === true &&
+                                styles.recommendationButtonSelected,
+                        ]}
+                        onPress={() =>
+                            updateRecommendation(
+                                field,
+                                value === true? null : true
+                            )
+                        }
+                    >
+                        <Text
+                            style={[
+                                styles.recommendationButtonText,
+                                value === true &&
+                                    styles.recommendationButtonTextSelected,
+                            ]}
+                        >
+                            Sí
+                        </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[
+                            styles.recommendationButton,
+                            value === false &&
+                                styles.recommendationButtonSelected,
+                        ]}
+                        onPress={() =>
+                            updateRecommendation(
+                                field,
+                                value === false ? null: false
+                            )
+                        }
+                    >
+                        <Text
+                            style={[
+                                styles.recommendationButtonText,
+                                value === false &&
+                                    styles.recommendationButtonTextSelected,
+                            ]}
+                        >
+                            No
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        );
+    };
+
+    const renderSpecificRating = (
+        label: string,
+        field:
+            | 'coffeeRating'
+            | 'foodRating'
+            | 'serviceRating'
+            | 'comfortRating'
+            | 'quietRating',
+        value: number | null
+    ) => {
+        return (
+            <View style={styles.specificRatingRow}>
+                <Text style={styles.specificRatingLabel}>
+                    {label}
+                </Text>
+
+                <View style={styles.smallStarsContainer}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                        <TouchableOpacity
+                            key={star}
+                            onPress={() =>
+                                updateSpecificRating(
+                                    field,
+                                    star
+                                )
+                            }
+                        >
+                            <Text style={styles.smallStar}>
+                                {value !== null &&
+                                star <= value
+                                    ? '★'
+                                    : '☆'}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+            </View>
+        );
+    };
 
     const handleSubmit = async () => {
         if (!canSubmit)
@@ -61,6 +312,30 @@ export default function AddReviewScreen({ route, navigation }: Props) {
 
                 rating,
                 comment: comment.trim(),
+
+                coffeeRating:
+                    coffeeRating ?? undefined,
+
+                foodRating:
+                    foodRating ?? undefined,
+
+                serviceRating:
+                    serviceRating ?? undefined,
+
+                comfortRating:
+                    comfortRating ?? undefined,
+
+                quietRating:
+                    quietRating ?? undefined,
+
+                goodForWork:
+                    goodForWork ?? undefined,
+
+                goodForStudy:
+                    goodForStudy ?? undefined,
+
+                goodForDate:
+                    goodForDate ?? undefined,
             });
 
             clearDraft();
@@ -77,7 +352,10 @@ export default function AddReviewScreen({ route, navigation }: Props) {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View>
+            <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+            >
                 <Text style={styles.title}>
                     Reseñar {cafeName}
                 </Text>
@@ -101,6 +379,38 @@ export default function AddReviewScreen({ route, navigation }: Props) {
                                         comment: isCurrentCafeDraft
                                             ? draft.comment
                                             : '',
+
+                                        coffeeRating: isCurrentCafeDraft
+                                            ? draft.coffeeRating
+                                            : null,
+
+                                        foodRating: isCurrentCafeDraft
+                                            ? draft.foodRating
+                                            : null,
+
+                                        serviceRating: isCurrentCafeDraft
+                                            ? draft.serviceRating
+                                            : null,
+
+                                        comfortRating: isCurrentCafeDraft
+                                            ? draft.comfortRating
+                                            : null,
+
+                                        quietRating: isCurrentCafeDraft
+                                            ? draft.quietRating
+                                            : null,
+
+                                        goodForWork: isCurrentCafeDraft
+                                            ? draft.goodForWork
+                                            : null,
+
+                                        goodForStudy: isCurrentCafeDraft
+                                            ? draft.goodForStudy
+                                            : null,
+
+                                        goodForDate: isCurrentCafeDraft
+                                            ? draft.goodForDate
+                                            : null,
                                     })
                                 }
                             >
@@ -110,6 +420,72 @@ export default function AddReviewScreen({ route, navigation }: Props) {
                             </TouchableOpacity>
                         ))}
                     </View>
+                </View>
+                <View style={styles.specificRatingsSection}>
+                    <Text style={styles.label}>
+                        Contanos un poco más
+                    </Text>
+
+                    <Text style={styles.optionalText}>
+                        Estas valoraciones son opcionales.
+                    </Text>
+
+                    {renderSpecificRating(
+                        '☕ Café',
+                        'coffeeRating',
+                        coffeeRating
+                    )}
+
+                    {renderSpecificRating(
+                        '🍰 Comida',
+                        'foodRating',
+                        foodRating
+                    )}
+
+                    {renderSpecificRating(
+                        '🤝 Servicio',
+                        'serviceRating',
+                        serviceRating
+                    )}
+
+                    {renderSpecificRating(
+                        '🪑 Comodidad',
+                        'comfortRating',
+                        comfortRating
+                    )}
+
+                    {renderSpecificRating(
+                        '🔇 Tranquilidad',
+                        'quietRating',
+                        quietRating
+                    )}
+                </View>
+                <View style={styles.recommendationsSection}>
+                    <Text style={styles.label}>
+                        ¿Para qué lo recomendarías?
+                    </Text>
+
+                    <Text style={styles.optionalText}>
+                        Estas respuestas son opcionales.
+                    </Text>
+
+                    {renderRecommendation(
+                        '💻 Trabajar',
+                        'goodForWork',
+                        goodForWork
+                    )}
+
+                    {renderRecommendation(
+                        '📚 Estudiar',
+                        'goodForStudy',
+                        goodForStudy
+                    )}
+
+                    {renderRecommendation(
+                        '❤️ Cita',
+                        'goodForDate',
+                        goodForDate
+                    )}
                 </View>
                 <View style={styles.commentSection}>
                     <Text style={styles.label}>
@@ -126,6 +502,38 @@ export default function AddReviewScreen({ route, navigation }: Props) {
                                     ? draft.rating
                                     : 0,
                                 comment: text,
+
+                                coffeeRating: isCurrentCafeDraft
+                                    ? draft.coffeeRating
+                                    : null,
+
+                                foodRating: isCurrentCafeDraft
+                                    ? draft.foodRating
+                                    : null,
+
+                                serviceRating: isCurrentCafeDraft
+                                    ? draft.serviceRating
+                                    : null,
+
+                                comfortRating: isCurrentCafeDraft
+                                    ? draft.comfortRating
+                                    : null,
+
+                                quietRating: isCurrentCafeDraft
+                                    ? draft.quietRating
+                                    : null,
+
+                                goodForWork: isCurrentCafeDraft
+                                    ? draft.goodForWork
+                                    : null,
+
+                                goodForStudy: isCurrentCafeDraft
+                                    ? draft.goodForStudy
+                                    : null,
+
+                                goodForDate: isCurrentCafeDraft
+                                    ? draft.goodForDate
+                                    : null,
                             })
                         }
                         placeholder="Contanos qué te gustó o qué podría mejorar..."
@@ -152,7 +560,7 @@ export default function AddReviewScreen({ route, navigation }: Props) {
                         </Text>
                     </TouchableOpacity>
                 </View>
-            </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }
@@ -237,5 +645,87 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 16,
         fontWeight: '600',
+    },
+
+    specificRatingsSection: {
+        marginTop: 28,
+    },
+
+    optionalText: {
+        marginTop: 4,
+        fontSize: 13,
+        color: '#9A8578',
+    },
+
+    specificRatingRow: {
+        marginTop: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+
+    specificRatingLabel: {
+        fontSize: 15,
+        color: '#4A2416',
+    },
+
+    smallStarsContainer: {
+        flexDirection: 'row',
+        gap: 5,
+    },
+
+    smallStar: {
+        fontSize: 25,
+        color: '#6B3A22',
+    },
+
+    scrollContent: {
+        paddingBottom: 40,
+    },
+
+    recommendationRow: {
+        marginTop: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+
+    recommendationLabel: {
+        flex: 1,
+        fontSize: 15,
+        color: '#4A2416',
+    },
+
+    recommendationOptions: {
+        flexDirection: 'row',
+        gap: 8,
+    },
+
+    recommendationButton: {
+        minWidth: 48,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderWidth: 1,
+        borderColor: '#D8C4B4',
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+
+    recommendationButtonSelected: {
+        backgroundColor: '#6B3A22',
+        borderColor: '#6B3A22',
+    },
+
+    recommendationButtonText: {
+        color: '#6B3A22',
+        fontWeight: '600',
+    },
+
+    recommendationButtonTextSelected: {
+        color: '#FFFFFF',
+    },
+
+    recommendationsSection: {
+        marginTop: 28,
     },
 });

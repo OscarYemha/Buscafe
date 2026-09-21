@@ -4,6 +4,16 @@ type ReviewDraft = {
     cafeId: string | null;
     rating: number;
     comment: string;
+
+    coffeeRating: number | null;
+    foodRating: number | null;
+    serviceRating: number | null;
+    comfortRating: number | null;
+    quietRating: number | null;
+
+    goodForWork: boolean | null;
+    goodForStudy: boolean | null;
+    goodForDate: boolean | null;
 };
 
 type ReviewDraftContextType = {
@@ -16,6 +26,16 @@ const initialDraft: ReviewDraft = {
     cafeId: null,
     rating: 0,
     comment: '',
+
+    coffeeRating: null,
+    foodRating: null,
+    serviceRating: null,
+    comfortRating: null,
+    quietRating: null,
+    
+    goodForWork: null,
+    goodForStudy: null,
+    goodForDate: null,
 };
 
 const ReviewDraftContext = 
