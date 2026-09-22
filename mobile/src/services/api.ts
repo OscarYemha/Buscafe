@@ -1,7 +1,9 @@
 import { CafeSummary } from "../types/CafeSummary";
 import { CafeDetail } from "../types/CafeDetail";
 
-const API_URL = 'http://192.168.0.12:3001';
+const API_URL =
+    process.env.EXPO_PUBLIC_API_URL ??
+    'http://localhost:3001';
 
 export type CafeSearchResult = {
     cafes: CafeSummary[];
