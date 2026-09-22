@@ -52,7 +52,9 @@ export async function getNearbyCafes(
 export async function searchCafes(
     query: string,
     pageToken?: string,
-    resolvedQuery?: string
+    resolvedQuery?: string,
+    latitude?: number,
+    longitude?: number
 ): Promise<CafeSearchResult>
 {
     const params =
@@ -71,6 +73,14 @@ export async function searchCafes(
             'resolvedQuery',
             resolvedQuery
         );
+    }
+
+    if (latitude !== undefined && longitude !== undefined
+    )
+    {
+        params.set('latitude', latitude.toString());
+
+        params.set('longitude', longitude.toString());
     }
 
     const response = await fetch(

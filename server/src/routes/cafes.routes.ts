@@ -182,6 +182,22 @@ router.get('/search', async (req, res) => {
                 ? req.query.resolvedQuery.trim()
                 : undefined;
 
+        const hasLatitude = 
+            req.query.latitude !== undefined;
+
+        const hasLongitude =
+            req.query.longitude !== undefined;
+
+        const latitude = 
+            hasLatitude
+                ? Number(req.query.latitude)
+                : null;
+
+        const longitude =
+            hasLongitude
+                ? Number(req.query.longitude)
+                : null;
+
         if (query.length < 3)
         {
             return res.status(400).json({
@@ -200,6 +216,26 @@ router.get('/search', async (req, res) => {
             });
         }
 
+        if (hasLatitude !== hasLongitude)
+        {
+            return res.status(400).json({
+                error: 'Latitud y longitud deben enviarse juntas',
+            });
+        }
+
+        if (
+            hasLatitude &&
+            (
+                !Number.isFinite(latitude) ||
+                !Number.isFinite(longitude)
+            )
+        )
+        {
+            return res.status(400).json({
+                error: 'Latitud o longitud inválidas',
+            });
+        }
+
         const searchResult =
             await searchCafes(
                 query,
@@ -210,7 +246,21 @@ router.get('/search', async (req, res) => {
         const cafes =
             searchResult.places
                 .map(mapGooglePlaceToCafeSummary)
-                .filter((cafe) => cafe !== null);
+                .filter((cafe) => cafe !== null)
+                .map((cafe) => ({
+                    ...cafe,
+
+                    distanceKm:
+                        latitude !== null &&
+                        longitude !== null
+                            ? calculateDistanceKm(
+                                latitude,
+                                longitude,
+                                cafe.latitude,
+                                cafe.longitude
+                            )
+                            : null,
+                }));
 
         return res.json({
             cafes,

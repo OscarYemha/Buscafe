@@ -1,4 +1,4 @@
-import { useCallback, useEffect,useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import {
@@ -21,8 +21,9 @@ import { getCurrentLocation, UserLocation } from '../services/location';
 type Props = NativeStackScreenProps<RootStackParamlist, 'Home'>;
 
 
-
 export default function HomeScreen({navigation}: Props) {
+  const scrollViewRef = useRef<ScrollView>(null);
+
   const [cafes, setCafes] = useState<CafeSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +32,10 @@ export default function HomeScreen({navigation}: Props) {
   const [searchResults, setSearchResults] = useState<CafeSummary[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [nextPageToken, setNextPageToken] = useState<string | null>(null);
+  const [resolvedQuery, setResolvedQuery] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   async function loadNearbyCafes() {
     try
@@ -88,6 +93,8 @@ export default function HomeScreen({navigation}: Props) {
     if (query.length < 3)
     {
       setSearchResults([]);
+      setNextPageToken(null);
+      setResolvedQuery(null);
       setSearchLoading(false);
       setSearchError(null);
 
@@ -102,11 +109,21 @@ export default function HomeScreen({navigation}: Props) {
           setSearchError(null);
 
           const result =
-            await searchCafes(query);
+            await searchCafes(
+              query,
+              undefined,
+              undefined,
+              userLocation?.latitude,
+              userLocation?.longitude
+            );
 
           setSearchResults(
             result.cafes
           );
+          
+          setNextPageToken(result.nextPageToken);
+
+          setResolvedQuery(result.resolvedQuery);
         }
         catch (error)
         {
@@ -116,6 +133,8 @@ export default function HomeScreen({navigation}: Props) {
           );
 
           setSearchResults([]);
+          setNextPageToken(null);
+          setResolvedQuery(null);
           setSearchError(
             'No se pudieron buscar cafeterías.'
           );
@@ -129,13 +148,69 @@ export default function HomeScreen({navigation}: Props) {
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [searchText]);
+  }, [searchText, userLocation]);
+
+  async function loadMoreSearchResults()
+  {
+    const query = searchText.trim();
+    
+    if (
+      !nextPageToken ||
+      !resolvedQuery ||
+      loadingMore
+    )
+    {
+      return;
+    }
+
+    try
+    {
+      setLoadingMore(true);
+      setSearchError(null);
+
+      const result =
+        await searchCafes(
+          query,
+          nextPageToken,
+          resolvedQuery,
+          userLocation?.latitude,
+          userLocation?.longitude
+        );
+
+      setSearchResults((currentResults) => [
+        ...currentResults,
+        ...result.cafes
+      ]);
+
+      setNextPageToken(result.nextPageToken);
+
+      setResolvedQuery(result.resolvedQuery);
+    }
+    catch (error)
+    {
+      console.error('Error al cargar más cafeterías', error);
+
+      setSearchError('No se pudieron cargar más cafeterías');
+    }
+    finally
+    {
+      setLoadingMore(false);
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
+        ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
+        onScroll={(event) => {
+          const offsetY =
+            event.nativeEvent.contentOffset.y;
+
+          setShowScrollTop(offsetY > 500);
+        }}
+        scrollEventThrottle={16}
       >
         <StatusBar style="dark" />
 
@@ -216,6 +291,19 @@ export default function HomeScreen({navigation}: Props) {
                   }}
                 />
               ))}
+              {nextPageToken && (
+                <TouchableOpacity
+                  style={styles.showAllButton}
+                  onPress={loadMoreSearchResults}
+                  disabled={loadingMore}
+                >
+                  <Text style={styles.showAllButtonText}>
+                    {loadingMore
+                      ? 'Cargando...'
+                      : 'Ver más'}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
         )}
 
@@ -292,6 +380,21 @@ export default function HomeScreen({navigation}: Props) {
           </TouchableOpacity>
         )}
       </ScrollView>
+      {showScrollTop && (
+        <TouchableOpacity
+          style={styles.scrollTopButton}
+          onPress={() => {
+            scrollViewRef.current?.scrollTo({
+              y: 0,
+              animated: true,
+            });
+          }}
+        >
+          <Text style={styles.scrollTopButtonText}>
+            ↑ Ir arriba
+          </Text>
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 }
@@ -429,5 +532,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#6B3A22',
+  },
+
+  scrollTopButton: {
+    position: 'absolute',
+    right: 20,
+    bottom: 70,
+    backgroundColor: '#6B3A22',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 24,
+    elevation: 4,
+  },
+
+  scrollTopButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

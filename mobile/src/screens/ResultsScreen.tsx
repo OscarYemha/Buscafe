@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity,View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamlist } from "../navigation/AppNavigator";
@@ -17,9 +17,12 @@ export default function ResultsScreen({ route, navigation }: Props) {
         longitude,
     } = route.params;
 
+    const scrollViewRef = useRef<ScrollView>(null);
+
     const [cafes, setCafes] = useState<CafeSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [showScrollTop, setShowScrollTop] = useState(false);
 
     useEffect(() => {
         async function loadNearbyCafes() 
@@ -72,8 +75,16 @@ export default function ResultsScreen({ route, navigation }: Props) {
                 </Text>
             </View>
             <ScrollView
+                ref={scrollViewRef}
                 contentContainerStyle={styles.list}
                 showsVerticalScrollIndicator={false}
+                onScroll={(event) => {
+                    const offsetY =
+                        event.nativeEvent.contentOffset.y;
+
+                    setShowScrollTop(offsetY > 500);
+                }}
+                scrollEventThrottle={16}
                 >
                 {loading && (
                     <Text style={styles.message}>
@@ -112,6 +123,21 @@ export default function ResultsScreen({ route, navigation }: Props) {
                     />
                 ))}
             </ScrollView>
+            {showScrollTop && (
+                <TouchableOpacity
+                    style={styles.scrollTopButton}
+                    onPress={() => {
+                        scrollViewRef.current?.scrollTo({
+                            y: 0,
+                            animated: true,
+                        });
+                    }}
+                >
+                    <Text style={styles.scrollTopButtonText}>
+                        ↑ Ir arriba
+                    </Text>
+                </TouchableOpacity>
+            )}
         </SafeAreaView>
     );
 }
@@ -171,5 +197,22 @@ const styles = StyleSheet.create({
         color: '#7A6254',
         textAlign: 'center',
         lineHeight: 21,
+    },
+
+    scrollTopButton: {
+        position: 'absolute',
+        right: 20,
+        bottom: 70,
+        backgroundColor: '#6B3A22',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderRadius: 24,
+        elevation: 4,
+    },
+
+    scrollTopButtonText: {
+        color: '#FFFFFF',
+        fontSize: 14,
+        fontWeight: '600',
     },
 });
