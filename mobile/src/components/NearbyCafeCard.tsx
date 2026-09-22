@@ -20,6 +20,15 @@ export default function NearbyCafeCard({
     const distanceLabel =
         formatDistance(cafe.distanceKm);
 
+    const addressLabel =
+        [
+            cafe.shortAddress,
+            cafe.neighborhood,
+            cafe.city,
+        ]
+            .filter(Boolean)
+            .join(' · ');
+
     const priceLabel =
         cafe.priceLevel !== null
             ? '$'.repeat(cafe.priceLevel)
@@ -43,7 +52,7 @@ export default function NearbyCafeCard({
             </Text>
 
             <Text style={styles.address}>
-                {cafe.address}
+                {addressLabel}
             </Text>
 
             <View style={styles.ratings}>

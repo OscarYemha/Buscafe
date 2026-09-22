@@ -22,6 +22,17 @@ const CAFE_TYPES = new Set([
     'cafeteria',
 ]);
 
+type GooglePlaceSearchPage = {
+    places: GooglePlace[];
+    nextPageToken: string | null;
+};
+
+export type CafeSearchResult = {
+    places: GooglePlace[];
+    nextPageToken: string | null;
+    resolvedQuery: string;
+};
+
 function isCafe(place: GooglePlace): boolean {
     return place.types?.some(
         (type) => CAFE_TYPES.has(type)
@@ -52,6 +63,7 @@ async function searchCafesByText(
                     'places.id',
                     'places.displayName',
                     'places.formattedAddress',
+                    'places.addressComponents',
                     'places.location',
                     'places.types',
                     'places.primaryType',
@@ -168,6 +180,144 @@ export async function searchAllCafesByText(
     return nearbyPlaces;
 }
 
+async function searchPlacesByQuery(
+    query: string,
+    pageToken?: string
+): Promise<GooglePlaceSearchPage> {
+    const apiKey =
+        process.env.GOOGLE_PLACES_API_KEY;
+
+    if (!apiKey)
+    {
+        throw new Error(
+            'GOOGLE_PLACES_API_KEY no está definida'
+        );
+    }
+
+    const response = await fetch(
+        GOOGLE_TEXT_SEARCH_URL,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Goog-Api-Key': apiKey,
+                'X-Goog-FieldMask': [
+                    'places.id',
+                    'places.displayName',
+                    'places.formattedAddress',
+                    'places.addressComponents',
+                    'places.location',
+                    'places.types',
+                    'places.primaryType',
+                    'places.primaryTypeDisplayName',
+                    'places.googleMapsTypeLabel',
+                    'places.rating',
+                    'places.userRatingCount',
+                    'places.priceLevel',
+                    'places.allowsDogs',
+                    'places.currentOpeningHours.openNow',
+                    'nextPageToken',
+                ].join(','),
+            },
+            body: JSON.stringify({
+                textQuery: query,
+                pageSize: 20,
+                languageCode: 'es',
+                regionCode: 'AR',
+                ...(pageToken && {
+                    pageToken,
+                }),
+            }),
+        }
+    );
+
+    if (!response.ok)
+    {
+        const errorBody =
+            await response.text();
+
+        throw new Error(
+            `Error de Google Text Search: ` +
+            `${response.status} ${errorBody}`
+        );
+    }
+
+    const data: GoogleTextSearchResponse =
+        await response.json();
+
+    return {
+        places: data.places ?? [],
+        nextPageToken: data.nextPageToken ?? null,
+    };
+}
+
+export async function searchCafes(
+    query: string,
+    pageToken?: string,
+    resolvedQuery?: string
+): Promise<CafeSearchResult> {
+    const normalizedQuery =
+        query.trim();
+
+    if (pageToken && resolvedQuery)
+    {
+        const page =
+            await searchPlacesByQuery(
+                resolvedQuery,
+                pageToken
+            );
+
+        return {
+            places: page.places.filter((place) =>
+                place.location &&
+                isCafe(place)
+            ),
+            nextPageToken:
+                page.nextPageToken ?? null,
+            resolvedQuery,
+        };
+    }
+
+    const directPage =
+        await searchPlacesByQuery(
+            normalizedQuery
+        );
+
+    const directCafes =
+        directPage.places.filter((place) =>
+            place.location &&
+            isCafe(place)
+        );
+
+    if (directCafes.length > 0)
+    {
+        return {
+            places: directCafes,
+            nextPageToken:
+                directPage.nextPageToken ?? null,
+            resolvedQuery: normalizedQuery,
+        };
+    }
+
+    const areaQuery =
+        `cafeterías en ${normalizedQuery}`;
+
+    const areaPage =
+        await searchPlacesByQuery(
+            areaQuery
+        );
+
+    return {
+        places: areaPage.places.filter((place) =>
+            place.location &&
+            isCafe(place)
+        ),
+        nextPageToken:
+            areaPage.nextPageToken ?? null,
+        resolvedQuery: areaQuery,
+    };
+}
+
 export async function getPlaceDetails(
     googlePlaceId: string
 ): Promise<GooglePlace> {
@@ -191,6 +341,7 @@ export async function getPlaceDetails(
                     'id',
                     'displayName',
                     'formattedAddress',
+                    'addressComponents',
                     'location',
                     'types',
                     'primaryType',

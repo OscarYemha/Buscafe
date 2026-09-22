@@ -8,6 +8,13 @@ export type GooglePlace = {
 
     formattedAddress?: string;
 
+    addressComponents?: {
+        longText: string;
+        shortText: string;
+        types?: string[];
+        languageCode?: string;
+    }[];
+
     location?: {
         latitude: number;
         longitude: number;

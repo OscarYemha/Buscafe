@@ -3,6 +3,12 @@ import { CafeDetail } from "../types/CafeDetail";
 
 const API_URL = 'http://192.168.0.12:3001';
 
+export type CafeSearchResult = {
+    cafes: CafeSummary[];
+    nextPageToken: string | null;
+    resolvedQuery: string;
+}
+
 export async function getCafes() 
 {
     const response = await fetch(`${API_URL}/cafes`);
@@ -38,6 +44,44 @@ export async function getNearbyCafes(
     if (!response.ok)
     {
         throw new Error('No se pudieron obtener las cafeterías cercanas');
+    }
+
+    return response.json();
+}
+
+export async function searchCafes(
+    query: string,
+    pageToken?: string,
+    resolvedQuery?: string
+): Promise<CafeSearchResult>
+{
+    const params =
+        new URLSearchParams({
+            query,
+        });
+
+    if (pageToken && resolvedQuery)
+    {
+        params.set(
+            'pageToken',
+            pageToken
+        );
+
+        params.set(
+            'resolvedQuery',
+            resolvedQuery
+        );
+    }
+
+    const response = await fetch(
+        `${API_URL}/cafes/search?${params.toString()}`
+    );
+
+    if (!response.ok)
+    {
+        throw new Error(
+            'No se pudieron buscar cafeterías'
+        );
     }
 
     return response.json();

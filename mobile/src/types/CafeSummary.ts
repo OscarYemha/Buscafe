@@ -2,6 +2,9 @@ export type CafeSummary = {
     googlePlaceId: string;
     name: string;
     address: string;
+    shortAddress: string;
+    neighborhood: string | null;
+    city: string | null;
     latitude: number;
     longitude: number;
 

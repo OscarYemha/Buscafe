@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Prisma } from '../generated/prisma/client.js';
 import prisma from '../lib/prisma.js';
-import { getPlaceDetails, searchAllCafesByText } from '../services/googlePlaces.js';
+import { getPlaceDetails, searchAllCafesByText, searchCafes } from '../services/googlePlaces.js';
 import { mapGooglePlaceToCafeSummary } from '../services/cafeMapper.js';
 import { calculateDistanceKm } from '../utils/distance.js';
 import { getCafeStats } from '../services/cafeStats.js';
@@ -160,6 +160,72 @@ router.get('/nearby', async (req, res) => {
 
         return res.status(500).json({
             error: 'No se pudieron obtener las cafeterías cercanas',
+        });
+    }
+});
+
+router.get('/search', async (req, res) => {
+    try
+    {
+        const query =
+            typeof req.query.query === 'string'
+                ? req.query.query.trim()
+                : '';
+
+        const pageToken =
+            typeof req.query.pageToken === 'string'
+                ? req.query.pageToken.trim()
+                : undefined;
+
+        const resolvedQuery =
+            typeof req.query.resolvedQuery === 'string'
+                ? req.query.resolvedQuery.trim()
+                : undefined;
+
+        if (query.length < 3)
+        {
+            return res.status(400).json({
+                error: 'La búsqueda debe tener al menos 3 caracteres',
+            });
+        }
+
+        if (
+            (pageToken && !resolvedQuery) ||
+            (!pageToken && resolvedQuery)
+        )
+        {
+            return res.status(400).json({
+                error:
+                    'pageToken y resolvedQuery deben enviarse juntos',
+            });
+        }
+
+        const searchResult =
+            await searchCafes(
+                query,
+                pageToken,
+                resolvedQuery
+            );
+
+        const cafes =
+            searchResult.places
+                .map(mapGooglePlaceToCafeSummary)
+                .filter((cafe) => cafe !== null);
+
+        return res.json({
+            cafes,
+            nextPageToken:
+                searchResult.nextPageToken,
+            resolvedQuery:
+                searchResult.resolvedQuery,
+        });
+    }
+    catch (error)
+    {
+        console.error(error);
+
+        return res.status(500).json({
+            error: 'No se pudieron buscar cafeterías',
         });
     }
 });

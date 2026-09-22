@@ -99,6 +99,15 @@ export default function CafeDetailScreen({ route, navigation }: Props)
             ]
             : null;
 
+    const addressLabel =
+        [
+            cafe.shortAddress,
+            cafe.neighborhood,
+            cafe.city,
+        ]
+            .filter(Boolean)
+            .join(' · ');
+
     const openDirections = () => {
         const address = encodeURIComponent(cafe.address);
 
@@ -193,7 +202,7 @@ export default function CafeDetailScreen({ route, navigation }: Props)
                     )}
 
                     <Text style={styles.info}>
-                        📍 {cafe.address}
+                        📍 {addressLabel}
                     </Text>
                     <Text style={styles.info}>
                         {cafe.allowsDogs === true

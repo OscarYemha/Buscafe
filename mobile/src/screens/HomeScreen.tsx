@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect,useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import {
@@ -15,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { cafeIntents } from '../data/cafeIntents';
 import NearbyCafeCard from '../components/NearbyCafeCard';
 import { CafeSummary } from '../types/CafeSummary';
-import { getNearbyCafes } from '../services/api';
+import { getNearbyCafes, searchCafes } from '../services/api';
 import { getCurrentLocation, UserLocation } from '../services/location';
 
 type Props = NativeStackScreenProps<RootStackParamlist, 'Home'>;
@@ -27,6 +27,10 @@ export default function HomeScreen({navigation}: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
+  const [searchText, setSearchText] = useState('');
+  const [searchResults, setSearchResults] = useState<CafeSummary[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   async function loadNearbyCafes() {
     try
@@ -77,6 +81,56 @@ export default function HomeScreen({navigation}: Props) {
     }, [])
   );
 
+  useEffect(() => {
+    const query =
+      searchText.trim();
+
+    if (query.length < 3)
+    {
+      setSearchResults([]);
+      setSearchLoading(false);
+      setSearchError(null);
+
+      return;
+    }
+
+    const timeoutId =
+      setTimeout(async () => {
+        try
+        {
+          setSearchLoading(true);
+          setSearchError(null);
+
+          const result =
+            await searchCafes(query);
+
+          setSearchResults(
+            result.cafes
+          );
+        }
+        catch (error)
+        {
+          console.error(
+            'Error al buscar cafeterías:',
+            error
+          );
+
+          setSearchResults([]);
+          setSearchError(
+            'No se pudieron buscar cafeterías.'
+          );
+        }
+        finally
+        {
+          setSearchLoading(false);
+        }
+      }, 500);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [searchText]);
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -118,18 +172,60 @@ export default function HomeScreen({navigation}: Props) {
               </TouchableOpacity>
           ))}
         </View>
+        <Text style={styles.sectionTitle}>
+          ¿Dónde querés buscar?
+        </Text>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar zona o cafetería"
+          placeholderTextColor="#8C7A6B"
+          value={searchText}
+          onChangeText={setSearchText}
+        />
 
         <Text style={styles.sectionTitle}>
-          Cafés cerca de vos
+          {searchText.trim().length >= 3
+            ? `Resultados para "${searchText.trim()}"`
+            : 'Cafés cerca de vos'}
         </Text>
 
-        {loading && (
+        {searchText.trim().length >= 3 && searchLoading && (
+          <Text style={styles.message}>
+            Buscando cafeterías...
+          </Text>
+        )}
+
+        {searchText.trim().length >= 3 && searchError && (
+          <Text style={styles.error}>
+            {searchError}
+          </Text>
+        )}
+
+        {searchText.trim().length >= 3 &&
+          !searchLoading &&
+          !searchError && (
+            <View style={styles.cafesContainer}>
+              {searchResults.map((cafe) => (
+                <NearbyCafeCard
+                  key={cafe.googlePlaceId}
+                  cafe={cafe}
+                  onPress={() => {
+                    navigation.navigate('CafeDetail', {
+                      googlePlaceId: cafe.googlePlaceId,
+                    });
+                  }}
+                />
+              ))}
+            </View>
+        )}
+
+        {searchText.trim().length < 3 && loading && (
           <Text style={styles.message}>
             Buscando cafeterías cercanas...
           </Text>
         )}
 
-        {error && (
+        {searchText.trim().length < 3 && error && (
           <View style={styles.locationCard}>
             <Text style={styles.error}>
               {error}
@@ -146,7 +242,7 @@ export default function HomeScreen({navigation}: Props) {
           </View>
         )}
 
-        {!loading && !error && (
+        {searchText.trim().length < 3 && !loading && !error && (
           <View style={styles.cafesContainer}>
             {cafes.slice(0, 5).map((cafe) => (
               <NearbyCafeCard
@@ -161,7 +257,11 @@ export default function HomeScreen({navigation}: Props) {
             ))}
           </View>
         )}
-        {!loading && !error && cafes.length > 5 && userLocation && (
+        {searchText.trim().length < 3 &&
+          !loading && 
+          !error && 
+          cafes.length > 5 && 
+          userLocation && (
           <TouchableOpacity
             style={styles.showAllButton}
             onPress={() => {
@@ -176,7 +276,10 @@ export default function HomeScreen({navigation}: Props) {
             </Text>
           </TouchableOpacity>
         )}
-        {!loading && !error && cafes.length > 0 && (
+        {searchText.trim().length < 3 &&
+          !loading && 
+          !error && 
+          cafes.length > 0 && (
           <TouchableOpacity
             style={styles.mapButton}
             onPress={() => {
@@ -188,15 +291,6 @@ export default function HomeScreen({navigation}: Props) {
             </Text>
           </TouchableOpacity>
         )}
-        <Text style={styles.sectionTitle}>
-          ¿Buscás en otro lugar?
-        </Text>
-
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Buscar zona o cafetería"
-          placeholderTextColor="#8C7A6B"
-        />
       </ScrollView>
     </SafeAreaView>
   );
