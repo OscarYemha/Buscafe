@@ -195,6 +195,13 @@ export default function CafeDetailScreen({ route, navigation }: Props)
                     <Text style={styles.info}>
                         📍 {cafe.address}
                     </Text>
+                    <Text style={styles.info}>
+                        {cafe.allowsDogs === true
+                            ? '🐕 Acepta mascotas'
+                            : cafe.allowsDogs === false
+                                ? '🚫🐕 No acepta mascotas'
+                                : '🐕 Mascotas: información no disponible'}
+                    </Text>
                 </View>
                 {(
                     cafe.coffeeRating !== null ||

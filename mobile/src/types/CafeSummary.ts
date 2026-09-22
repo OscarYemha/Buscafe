@@ -25,4 +25,5 @@ export type CafeSummary = {
     distanceKm: number | null;
     priceLevel: number | null;
     isOpen: boolean | null;
+    allowsDogs: boolean | null;
 };

@@ -199,6 +199,7 @@ export async function getPlaceDetails(
                     'rating',
                     'userRatingCount',
                     'priceLevel',
+                    'allowsDogs',
                     'currentOpeningHours',
                     'regularOpeningHours',
                     'websiteUri',
