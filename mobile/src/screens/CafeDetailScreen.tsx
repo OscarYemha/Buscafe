@@ -239,36 +239,42 @@ export default function CafeDetailScreen({ route, navigation }: Props)
                         )}
 
                         {(
-                        cafe.goodForWorkCount > 0 ||
-                        cafe.goodForStudyCount > 0 ||
-                        cafe.goodForDateCount > 0
-                    ) && (
-                        <View style={styles.communityRecommendations}>
-                            <Text style={styles.communityRecommendationsTitle}>
-                                Ideal para
-                            </Text>
+                            (cafe.goodForWorkPercentage !== null &&
+                                cafe.goodForWorkPercentage > 50) ||
+                            (cafe.goodForStudyPercentage !== null &&
+                                cafe.goodForStudyPercentage > 50) ||
+                            (cafe.goodForDatePercentage !== null &&
+                                cafe.goodForDatePercentage > 50)
+                        ) && (
+                            <View style={styles.communityRecommendations}>
+                                <Text style={styles.communityRecommendationsTitle}>
+                                    Ideal para
+                                </Text>
 
-                            <View style={styles.communityRecommendationTags}>
-                                {cafe.goodForWorkCount > 0 && (
-                                    <Text style={styles.communityRecommendationTag}>
-                                        💻 Trabajar   👤👤 {cafe.goodForWorkCount}
-                                    </Text>
-                                )}
+                                <View style={styles.communityRecommendationTags}>
+                                    {cafe.goodForWorkPercentage !== null &&
+                                        cafe.goodForWorkPercentage > 50 && (
+                                            <Text style={styles.communityRecommendationTag}>
+                                                💻 Trabajar   👤👤 {cafe.goodForWorkCount}
+                                            </Text>
+                                        )}
 
-                                {cafe.goodForStudyCount > 0 && (
-                                    <Text style={styles.communityRecommendationTag}>
-                                        📚 Estudiar   👤👤 {cafe.goodForStudyCount}
-                                    </Text>
-                                )}
+                                    {cafe.goodForStudyPercentage !== null &&
+                                        cafe.goodForStudyPercentage > 50 && (
+                                            <Text style={styles.communityRecommendationTag}>
+                                                📚 Estudiar   👤👤 {cafe.goodForStudyCount}
+                                            </Text>
+                                        )}
 
-                                {cafe.goodForDateCount > 0 && (
-                                    <Text style={styles.communityRecommendationTag}>
-                                        ❤️ Cita   👤👤 {cafe.goodForDateCount}
-                                    </Text>
-                                )}
+                                    {cafe.goodForDatePercentage !== null &&
+                                        cafe.goodForDatePercentage > 50 && (
+                                            <Text style={styles.communityRecommendationTag}>
+                                                ❤️ Cita   👤👤 {cafe.goodForDateCount}
+                                            </Text>
+                                        )}
+                                </View>
                             </View>
-                        </View>
-                    )}
+                        )}
                     </View>
                 )}
                 <View style={styles.section}>
@@ -624,6 +630,7 @@ const styles = StyleSheet.create({
     },
 
     emptyReviews: {
+        marginBottom: 12,
         fontSize: 14,
         color: '#7A6254',
     },

@@ -5,7 +5,7 @@ import { getPlaceDetails, searchAllCafesByText } from '../services/googlePlaces.
 import { mapGooglePlaceToCafeSummary } from '../services/cafeMapper.js';
 import { calculateDistanceKm } from '../utils/distance.js';
 import { getCafeStats } from '../services/cafeStats.js';
-import { error } from 'node:console';
+import { filterCafesByRecommendation, filterCafesByRating, filterPetFriendlyCafes } from '../services/cafeRanking.js';
 
 const router = Router();
 
@@ -28,6 +28,11 @@ router.get('/nearby', async (req, res) => {
     {
         const latitude = Number(req.query.latitude);
         const longitude = Number(req.query.longitude);
+
+        const intent =
+            typeof req.query.intent === 'string'
+                ? req.query.intent
+                : undefined;
 
         if (!Number.isFinite(latitude) || !Number.isFinite(longitude))
         {
@@ -62,6 +67,30 @@ router.get('/nearby', async (req, res) => {
                     buscafeReviewsCount:
                         stats.reviewsCount,
 
+                        coffeeRating:
+                            stats.coffeeRating,
+
+                        foodRating:
+                            stats.foodRating,
+
+                        goodForWorkPercentage:
+                            stats.goodForWorkPercentage,
+
+                        goodForStudyPercentage:
+                            stats.goodForStudyPercentage,
+
+                        goodForDatePercentage:
+                            stats.goodForDatePercentage,
+
+                        goodForWorkCount:
+                            stats.goodForWorkCount,
+
+                        goodForStudyCount:
+                            stats.goodForStudyCount,
+
+                        goodForDateCount:
+                            stats.goodForDateCount,
+
                     distanceKm: calculateDistanceKm(
                         latitude,
                         longitude,
@@ -71,6 +100,43 @@ router.get('/nearby', async (req, res) => {
                 };
             })
         );
+
+        if (
+            intent === 'work' ||
+            intent === 'study' ||
+            intent === 'date'
+        )
+        {
+            const filteredCafes =
+                filterCafesByRecommendation(
+                    cafes,
+                    intent
+                );
+
+            return res.json(filteredCafes);
+        }
+
+        if (
+            intent === 'coffee' ||
+            intent === 'food'
+        )
+        {
+            const filteredCafes =
+                filterCafesByRating(
+                    cafes,
+                    intent
+                );
+
+            return res.json(filteredCafes);
+        }
+
+        if (intent === 'pet-friendly')
+        {
+            const filteredCafes =
+                filterPetFriendlyCafes(cafes);
+
+            return res.json(filteredCafes);
+        }
 
         cafes.sort((a, b) => {
             if (a.distanceKm === null)

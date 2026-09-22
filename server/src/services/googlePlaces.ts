@@ -60,6 +60,7 @@ async function searchCafesByText(
                     'places.rating',
                     'places.userRatingCount',
                     'places.priceLevel',
+                    'places.allowsDogs',
                     'places.currentOpeningHours.openNow',
                     'nextPageToken',
                 ].join(','),

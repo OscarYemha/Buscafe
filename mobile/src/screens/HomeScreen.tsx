@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import {
   ScrollView,
@@ -70,9 +71,11 @@ export default function HomeScreen({navigation}: Props) {
     }
   }
 
-  useEffect(() => {
-    loadNearbyCafes();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadNearbyCafes();
+    }, [])
+  );
 
   return (
     <SafeAreaView style={styles.container}>

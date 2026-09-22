@@ -31,7 +31,8 @@ export default function ResultsScreen({ route, navigation }: Props) {
 
                 const nearbyCafes = await getNearbyCafes(
                     latitude,
-                    longitude
+                    longitude,
+                    intent
                 );
 
                 setCafes(nearbyCafes);
@@ -49,7 +50,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
         }
 
         loadNearbyCafes();
-    }, [latitude, longitude]);
+    }, [latitude, longitude, intent]);
 
 
     const intentOption = intent
@@ -84,6 +85,19 @@ export default function ResultsScreen({ route, navigation }: Props) {
                     <Text style={styles.error}>
                         {error}
                     </Text>
+                )}
+
+                {!loading && !error && cafes.length === 0 && (
+                    <View style={styles.emptyContainer}>
+                        <Text style={styles.emptyTitle}>
+                            Todavía no encontramos cafeterías
+                        </Text>
+
+                        <Text style={styles.emptyText}>
+                            Aún no hay suficientes datos para recomendarte
+                            cafeterías ideales para {intentOption?.description}.
+                        </Text>
+                    </View>
                 )}
 
                 {!loading && !error && cafes.map((cafe) => (
@@ -136,5 +150,26 @@ const styles = StyleSheet.create({
     error: {
         fontSize: 16,
         color: '#A13D32',
+    },
+
+    emptyContainer: {
+        marginTop: 40,
+        alignItems: 'center',
+        paddingHorizontal: 20,
+    },
+
+    emptyTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#4A2416',
+        textAlign: 'center',
+    },
+
+    emptyText: {
+        marginTop: 8,
+        fontSize: 15,
+        color: '#7A6254',
+        textAlign: 'center',
+        lineHeight: 21,
     },
 });

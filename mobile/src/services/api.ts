@@ -19,13 +19,20 @@ export async function getCafes()
 
 export async function getNearbyCafes(
     latitude: number,
-    longitude: number
+    longitude: number,
+    intent?: string
 ): Promise<CafeSummary[]>
 {
+    const intentQuery =
+        intent
+            ? `&intent=${encodeURIComponent(intent)}`
+            : '';
+
     const response = await fetch(
         `${API_URL}/cafes/nearby` +
         `?latitude=${latitude}` +
-        `&longitude=${longitude}`
+        `&longitude=${longitude}` +
+        intentQuery
     );
 
     if (!response.ok)

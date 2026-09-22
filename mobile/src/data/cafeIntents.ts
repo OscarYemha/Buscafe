@@ -41,7 +41,7 @@ export const cafeIntents: CafeIntentOption[] = [
   {
     id: 'food',
     icon: '🍰',
-    label: 'Comer algo',
-    description: 'comer algo',
+    label: 'Cosas ricas',
+    description: 'comer cosas ricas',
   },
 ];

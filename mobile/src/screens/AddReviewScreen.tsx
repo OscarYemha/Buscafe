@@ -75,7 +75,7 @@ export default function AddReviewScreen({ route, navigation }: Props) {
             | 'serviceRating'
             | 'comfortRating'
             | 'quietRating',
-        value: number
+        value: number | null
         ) => {
             setDraft({
                 cafeId: googlePlaceId,
@@ -247,6 +247,14 @@ export default function AddReviewScreen({ route, navigation }: Props) {
         );
     };
 
+    const specificRatingOptions = [
+        { value: 1, label: 'Muy malo' },
+        { value: 2, label: 'Malo' },
+        { value: 3, label: 'Regular' },
+        { value: 4, label: 'Bueno' },
+        { value: 5, label: 'Excelente' },
+    ];
+
     const renderSpecificRating = (
         label: string,
         field:
@@ -258,27 +266,37 @@ export default function AddReviewScreen({ route, navigation }: Props) {
         value: number | null
     ) => {
         return (
-            <View style={styles.specificRatingRow}>
+            <View style={styles.specificRatingBlock}>
                 <Text style={styles.specificRatingLabel}>
                     {label}
                 </Text>
 
-                <View style={styles.smallStarsContainer}>
-                    {[1, 2, 3, 4, 5].map((star) => (
+                <View style={styles.specificRatingOptions}>
+                    {specificRatingOptions.map((option) => (
                         <TouchableOpacity
-                            key={star}
+                            key={option.value}
+                            style={[
+                                styles.specificRatingButton,
+                                value === option.value &&
+                                    styles.specificRatingButtonSelected,
+                            ]}
                             onPress={() =>
                                 updateSpecificRating(
                                     field,
-                                    star
+                                    value === option.value
+                                        ? null
+                                        : option.value
                                 )
                             }
                         >
-                            <Text style={styles.smallStar}>
-                                {value !== null &&
-                                star <= value
-                                    ? '★'
-                                    : '☆'}
+                            <Text
+                                style={[
+                                    styles.specificRatingButtonText,
+                                    value === option.value &&
+                                        styles.specificRatingButtonTextSelected,
+                                ]}
+                            >
+                                {option.label}
                             </Text>
                         </TouchableOpacity>
                     ))}
@@ -657,26 +675,45 @@ const styles = StyleSheet.create({
         color: '#9A8578',
     },
 
-    specificRatingRow: {
-        marginTop: 16,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+    specificRatingBlock: {
+        marginTop: 18,
     },
 
     specificRatingLabel: {
         fontSize: 15,
         color: '#4A2416',
+        marginBottom: 8,
     },
 
-    smallStarsContainer: {
+    specificRatingOptions: {
         flexDirection: 'row',
         gap: 5,
     },
 
-    smallStar: {
-        fontSize: 25,
+    specificRatingButton: {
+        flex: 1,
+        paddingVertical: 8,
+        paddingHorizontal: 2,
+        borderWidth: 1,
+        borderColor: '#D8C4B4',
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+
+    specificRatingButtonSelected: {
+        backgroundColor: '#6B3A22',
+        borderColor: '#6B3A22',
+    },
+
+    specificRatingButtonText: {
+        fontSize: 12,
         color: '#6B3A22',
+        textAlign: 'center',
+    },
+
+    specificRatingButtonTextSelected: {
+        color: '#FFFFFF',
+        fontWeight: '600',
     },
 
     scrollContent: {

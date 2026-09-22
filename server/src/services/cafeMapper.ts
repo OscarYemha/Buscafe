@@ -50,5 +50,6 @@ export function mapGooglePlaceToCafeSummary(
         distanceKm: null,
         priceLevel: mapGooglePriceLevel(place.priceLevel),
         isOpen: place.currentOpeningHours?.openNow ?? null,
+        allowsDogs: place.allowsDogs ?? null,
     };
 }

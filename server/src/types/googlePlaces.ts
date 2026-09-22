@@ -31,6 +31,8 @@ export type GooglePlace = {
     userRatingCount?: number;
     priceLevel?: string;
 
+    allowsDogs?: boolean;
+
     currentOpeningHours?: {
         openNow?: boolean;
         weekdayDescriptions?: string[];
