@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import {
+  AppState,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -23,11 +25,13 @@ type Props = NativeStackScreenProps<RootStackParamlist, 'Home'>;
 
 export default function HomeScreen({navigation}: Props) {
   const scrollViewRef = useRef<ScrollView>(null);
+  const waitingForLocationSettings = useRef(false);
 
   const [cafes, setCafes] = useState<CafeSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
+  const [canAskLocationAgain, setCanAskLocationAgain] = useState(true);
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState<CafeSummary[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -43,17 +47,25 @@ export default function HomeScreen({navigation}: Props) {
       setLoading(true);
       setError(null);
 
-      const location = await getCurrentLocation();
+      const result = await getCurrentLocation();
 
-      if (location === null)
+      if (result.status === 'denied')
       {
+        setUserLocation(null);
+        setCanAskLocationAgain(result.canAskAgain);
+
         setError(
-          'Necesitamos tu ubicación para mostrar cafeterías cercanas.'
+          result.canAskAgain
+          ? 'Necesitamos tu ubicación para mostrar cafeterías cercanas.'
+          : 'El acceso a tu ubicación está desactivado. Habilitalo desde los ajustes del teléfono para ver las cafeterías cercanas.'
         );
 
         return;
       }
 
+      const location = result.location;
+
+      setCanAskLocationAgain(true);
       setUserLocation(location);
 
       const nearbyCafes = await getNearbyCafes(
@@ -79,6 +91,27 @@ export default function HomeScreen({navigation}: Props) {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    const subscription =
+      AppState.addEventListener(
+        'change',
+        (nextAppState) => {
+          if (
+            nextAppState === 'active' &&
+            waitingForLocationSettings.current
+          )
+          {
+            waitingForLocationSettings.current = false;
+            loadNearbyCafes();
+          }
+        }
+      );
+
+      return () => {
+        subscription.remove();
+      }
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -114,7 +147,7 @@ export default function HomeScreen({navigation}: Props) {
               undefined,
               undefined,
               userLocation?.latitude,
-              userLocation?.longitude
+              userLocation?.longitude,
             );
 
           setSearchResults(
@@ -174,7 +207,7 @@ export default function HomeScreen({navigation}: Props) {
           nextPageToken,
           resolvedQuery,
           userLocation?.latitude,
-          userLocation?.longitude
+          userLocation?.longitude,
         );
 
       setSearchResults((currentResults) => [
@@ -321,10 +354,22 @@ export default function HomeScreen({navigation}: Props) {
 
             <TouchableOpacity
               style={styles.locationButton}
-              onPress={loadNearbyCafes}
+              onPress={() => {
+                if (canAskLocationAgain)
+                {
+                  loadNearbyCafes();
+                }
+                else
+                {
+                  waitingForLocationSettings.current = true;
+                  Linking.openSettings();
+                }
+              }}
             >
               <Text style={styles.locationButtonText}>
-                📍 Usar mi ubicación
+                {canAskLocationAgain
+                  ? '📍 Usar mi ubicación'
+                  : '⚙️ Abrir ajustes'}
               </Text>
             </TouchableOpacity>
           </View>

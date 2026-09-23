@@ -5,14 +5,32 @@ export type UserLocation = {
   longitude: number;
 };
 
-export async function getCurrentLocation():
-  Promise<UserLocation | null>
-{
-  const { status } =
-    await Location.requestForegroundPermissionsAsync();
+export type LocationResult = 
+  | {
+      status: 'granted';
+      location: UserLocation;
+    }
+  | {
+      status: 'denied';
+      canAskAgain: boolean;
+    };
 
-  if (status !== 'granted') {
-    return null;
+export async function getCurrentLocation():
+  Promise<LocationResult>
+{
+  let permission = await Location.getForegroundPermissionsAsync();
+
+  if (permission.status !== 'granted' && permission.canAskAgain)
+  {
+    permission = await Location.requestForegroundPermissionsAsync();
+  }
+
+  if (permission.status !== 'granted') 
+  {
+    return {
+      status: 'denied',
+      canAskAgain: permission.canAskAgain,
+    };
   }
 
   const location =
@@ -21,7 +39,10 @@ export async function getCurrentLocation():
     });
 
   return {
-    latitude: location.coords.latitude,
-    longitude: location.coords.longitude,
+    status: 'granted',
+    location: {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    },
   };
 }
