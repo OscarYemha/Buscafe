@@ -22,6 +22,21 @@ const CAFE_TYPES = new Set([
     'cafeteria',
 ]);
 
+const EXCLUDED_PRIMARY_TYPES = new Set([
+    'gas_station',
+    'restaurant',
+    'fast_food_restaurant',
+    'pizza_restaurant',
+    'hamburger_restaurant',
+    'bar',
+    'gastropub',
+]);
+
+const EXCLUDED_NAME_PATTERNS = [
+    /\bestaci[oó]n\s+(de\s+)?servicio\b/i,
+    /\bestaci[oó]n\s+gnc\b/i,
+];
+
 type GooglePlaceSearchPage = {
     places: GooglePlace[];
     nextPageToken: string | null;
@@ -34,9 +49,38 @@ export type CafeSearchResult = {
 };
 
 function isCafe(place: GooglePlace): boolean {
-    return place.types?.some(
-        (type) => CAFE_TYPES.has(type)
-    ) ?? false;
+    const types = place.types ?? [];
+
+    const hasCafeType =
+        types.some(
+            (type) => CAFE_TYPES.has(type)
+        );
+
+    if (!hasCafeType) {
+        return false;
+    }
+
+    if (
+        place.primaryType &&
+        EXCLUDED_PRIMARY_TYPES.has(
+            place.primaryType
+        )
+    ) {
+        return false;
+    }
+
+    const name =
+        place.displayName?.text ?? '';
+
+    if (
+        EXCLUDED_NAME_PATTERNS.some(
+            (pattern) => pattern.test(name)
+        )
+    ) {
+        return false;
+    }
+
+    return true;
 }
 
 async function searchCafesByText(
