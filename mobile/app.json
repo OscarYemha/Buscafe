@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Buscafé",
+    "name": "BusCafé",
     "slug": "buscafe",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,7 +10,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/buscafe-logo.png",
+          "image": "./assets/buscafe-splash.png",
           "imageWidth": 280,
           "resizeMode": "contain",
           "backgroundColor": "#F3E4C8"

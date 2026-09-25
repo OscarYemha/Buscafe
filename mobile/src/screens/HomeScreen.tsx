@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { CompositeScreenProps, useFocusEffect } from '@react-navigation/native';
+import { useEffect, useRef, useState } from 'react';
+import { CompositeScreenProps } from '@react-navigation/native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainTabParamList, RootStackParamlist } from '../navigation/AppNavigator';
@@ -37,6 +37,7 @@ export default function HomeScreen({navigation}: Props) {
 
   const [cafes, setCafes] = useState<CafeSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshingLocation, setRefreshingLocation] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [canAskLocationAgain, setCanAskLocationAgain] = useState(true);
@@ -100,6 +101,57 @@ export default function HomeScreen({navigation}: Props) {
     }
   }
 
+  async function refreshNearbyCafes()
+{
+  try
+  {
+    setRefreshingLocation(true);
+    setError(null);
+
+    const result = await getCurrentLocation();
+
+    if (result.status === 'denied')
+    {
+      setCanAskLocationAgain(result.canAskAgain);
+
+      setError(
+        result.canAskAgain
+          ? 'Necesitamos tu ubicación para mostrar cafeterías cercanas.'
+          : 'El acceso a tu ubicación está desactivado. Habilitalo desde los ajustes del teléfono para ver las cafeterías cercanas.'
+      );
+
+      return;
+    }
+
+    const location = result.location;
+
+    setCanAskLocationAgain(true);
+    setUserLocation(location);
+
+    const nearbyCafes = await getNearbyCafes(
+      location.latitude,
+      location.longitude
+    );
+
+    setCafes(nearbyCafes);
+  }
+  catch (error)
+  {
+    console.error(
+      'Error al actualizar las cafeterías cercanas:',
+      error
+    );
+
+    setError(
+      'No se pudieron actualizar las cafeterías cercanas.'
+    );
+  }
+  finally
+  {
+    setRefreshingLocation(false);
+  }
+}
+
   useEffect(() => {
     const subscription =
       AppState.addEventListener(
@@ -121,11 +173,9 @@ export default function HomeScreen({navigation}: Props) {
       }
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadNearbyCafes();
-    }, [])
-  );
+  useEffect(() => {
+    loadNearbyCafes();
+  }, [])
 
   useEffect(() => {
     const query =
@@ -310,11 +360,35 @@ export default function HomeScreen({navigation}: Props) {
           onChangeText={setSearchText}
         />
 
-        <Text style={styles.sectionTitle}>
-          {searchText.trim().length >= 3
-            ? `Resultados para "${searchText.trim()}"`
-            : 'Cafés cerca de vos'}
-        </Text>
+        {searchText.trim().length >= 3 ? (
+          <Text style={styles.sectionTitle}>
+            {`Resultados para "${searchText.trim()}"`}
+          </Text>
+        ) : (
+          <View style={styles.nearbyHeader}>
+            <Text style={styles.nearbyTitle}>
+              Cafés cerca de vos
+            </Text>
+
+            {!loading && !error && (
+              <TouchableOpacity
+                style={[
+                  styles.refreshButton,
+                  refreshingLocation &&
+                    styles.refreshButtonDisabled,
+                ]}
+                onPress={refreshNearbyCafes}
+                disabled={refreshingLocation}
+              >
+                <Text style={styles.refreshButtonText}>
+                  {refreshingLocation
+                    ? 'Actualizando...'
+                    : '↻  Actualizar cafés'}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
 
         {searchText.trim().length >= 3 && searchLoading && (
           <Text style={styles.message}>
@@ -570,15 +644,18 @@ const styles = StyleSheet.create({
   },
 
   showAllButton: {
+    alignSelf: 'center',
     marginTop: 16,
-    paddingVertical: 12,
-    alignItems: 'center',
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    backgroundColor: '#6B3A22',
+    borderRadius: 12,
   },
 
   showAllButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#6B3A22',
+    color: '#FFFFFF',
   },
 
   scrollTopButton: {
@@ -596,5 +673,38 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
+  },
+
+    nearbyHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 28,
+    marginBottom: 14,
+  },
+
+  nearbyTitle: {
+    flex: 1,
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#4A2416',
+  },
+
+  refreshButton: {
+    marginLeft: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    backgroundColor: '#6B3A22',
+  },
+
+  refreshButtonDisabled: {
+    opacity: 0.6,
+  },
+
+  refreshButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });

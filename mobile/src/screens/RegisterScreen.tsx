@@ -20,6 +20,10 @@ type Props =
         'Register'
     >;
 
+const isValidEmail = (email: string): boolean => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
 export default function RegisterScreen({
     navigation,
 }: Props)
@@ -55,7 +59,16 @@ export default function RegisterScreen({
             return;
         }
 
-        if (password.length < 8)
+        if (!isValidEmail(email.trim()))
+        {
+            setError(
+                'Ingresá un email válido'
+            );
+
+            return;
+        }
+
+        if (password.trim().length < 8)
         {
             setError(
                 'La contraseña debe tener al menos 8 caracteres'
@@ -134,6 +147,9 @@ export default function RegisterScreen({
                     autoCorrect={false}
                     editable={!isLoading}
                 />
+                <Text style={styles.passwordHint}>
+                    Mínimo 8 caracteres. Para mayor seguridad, combiná letras, números y símbolos.
+                </Text>
 
                 {error && (
                     <Text style={styles.error}>
@@ -247,5 +263,14 @@ const styles = StyleSheet.create({
         color: '#6B3A22',
         fontSize: 14,
         fontWeight: '600',
+    },
+
+    passwordHint: {
+        marginTop: -6,
+        marginBottom: 14,
+        paddingHorizontal: 2,
+        fontSize: 12,
+        lineHeight: 17,
+        color: '#7A6254',
     },
 });

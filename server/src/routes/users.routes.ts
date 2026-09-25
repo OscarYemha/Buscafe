@@ -4,7 +4,6 @@ import { Prisma } from "../generated/prisma/client.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { AuthenticatedRequest, requireAuth } from "../middleware/auth.js";
-import { error } from "node:console";
 
 const router = Router();
 
@@ -82,6 +81,10 @@ router.get('/', async (req, res) => {
     }
 });
 
+const isValidEmail = (email: string): boolean => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
 router.post('/', async (req, res) => {
     try {
         const {
@@ -95,8 +98,9 @@ router.post('/', async (req, res) => {
             name.trim() === '' ||
             typeof email !== 'string' ||
             email.trim() === '' ||
+            !isValidEmail(email.trim()) ||
             typeof password !== 'string' ||
-            password.length < 8
+            password.trim().length < 8
         ) {
             return res.status(400).json({
                 error: 'Los datos del usuario son inválidos',
