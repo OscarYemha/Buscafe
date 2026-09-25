@@ -19,7 +19,8 @@ model User {
   passwordHash String
   createdAt    DateTime @default(now())
 
-  reviews Review[]
+  reviews   Review[]
+  favorites Favorite[]
 }
 
 model Cafe {
@@ -31,7 +32,8 @@ model Cafe {
   longitude     Float
   createdAt     DateTime @default(now())
 
-  reviews Review[]
+  reviews   Review[]
+  favorites Favorite[]
 }
 
 model Review {
@@ -56,5 +58,20 @@ model Review {
   user User @relation(fields: [userId], references: [id])
   cafe Cafe @relation(fields: [cafeId], references: [id])
 
+  @@index([cafeId])
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  userId Int
+  cafeId Int
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cafe Cafe @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cafeId])
+  @@index([userId])
   @@index([cafeId])
 }

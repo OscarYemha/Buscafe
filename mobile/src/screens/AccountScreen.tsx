@@ -237,12 +237,11 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
         borderRadius: 14,
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#6B3A22',
+        backgroundColor: '#6B3A22',
     },
 
     logoutButtonText: {
-        color: '#6B3A22',
+        color: '#FFFFFF',
         fontSize: 16,
         fontWeight: '600',
     },
