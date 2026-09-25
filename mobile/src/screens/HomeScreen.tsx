@@ -1,5 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
-import { CompositeScreenProps } from '@react-navigation/native';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { CompositeScreenProps, useFocusEffect } from '@react-navigation/native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainTabParamList, RootStackParamlist } from '../navigation/AppNavigator';
@@ -21,6 +26,7 @@ import NearbyCafeCard from '../components/NearbyCafeCard';
 import { CafeSummary } from '../types/CafeSummary';
 import { getNearbyCafes, searchCafes } from '../services/api';
 import { getCurrentLocation, UserLocation } from '../services/location';
+import { useReviews } from '../context/ReviewsContext';
 
 type Props = CompositeScreenProps<
     BottomTabScreenProps<
@@ -34,6 +40,10 @@ type Props = CompositeScreenProps<
 export default function HomeScreen({navigation}: Props) {
   const scrollViewRef = useRef<ScrollView>(null);
   const waitingForLocationSettings = useRef(false);
+
+  const { reviewsVersion } = useReviews();
+
+  const lastReviewsVersion = useRef(reviewsVersion);
 
   const [cafes, setCafes] = useState<CafeSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -176,6 +186,18 @@ export default function HomeScreen({navigation}: Props) {
   useEffect(() => {
     loadNearbyCafes();
   }, [])
+
+  useFocusEffect(
+    useCallback(() => {
+      if (reviewsVersion === lastReviewsVersion.current)
+      {
+        return;
+      }
+
+      lastReviewsVersion.current = reviewsVersion;
+      loadNearbyCafes();
+    }, [reviewsVersion])
+  );
 
   useEffect(() => {
     const query =

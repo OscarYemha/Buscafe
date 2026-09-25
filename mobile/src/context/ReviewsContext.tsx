@@ -9,6 +9,8 @@ type ReviewsByCafe = {
 type ReviewsContextType = {
     reviewsByCafe: ReviewsByCafe;
     addReview: (cafeId: string, review: Review) => void;
+    reviewsVersion: number;
+    notifyReviewsChanged: () => void;
 }
 
 const ReviewContext = 
@@ -17,6 +19,11 @@ const ReviewContext =
 export function ReviewsProvider({ children,}: { children: ReactNode})
 {
     const [reviewsByCafe, setReviewsByCafe] = useState<ReviewsByCafe>({});
+    const [reviewsVersion, setReviewsVersion] = useState(0);
+
+    const notifyReviewsChanged = () => {
+        setReviewsVersion(current => current + 1);
+    };
 
     const addReview = (
         cafeId: string,
@@ -36,6 +43,8 @@ export function ReviewsProvider({ children,}: { children: ReactNode})
             value={{
                 reviewsByCafe,
                 addReview,
+                reviewsVersion,
+                notifyReviewsChanged,
             }}
         >
             {children}

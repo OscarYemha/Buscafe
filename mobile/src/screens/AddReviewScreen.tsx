@@ -5,6 +5,7 @@ import { RootStackParamlist } from '../navigation/AppNavigator';
 import { useReviewDraft } from '../context/ReviewDraftContext';
 import { useAuth } from '../context/AuthContext';
 import { createReview } from '../services/api';
+import { useReviews } from '../context/ReviewsContext';
 
 type Props = NativeStackScreenProps<
     RootStackParamlist,
@@ -22,6 +23,7 @@ export default function AddReviewScreen({ route, navigation }: Props) {
 
     const {draft, setDraft, clearDraft} = useReviewDraft();
     const {user, isAuthenticated} = useAuth();
+    const { notifyReviewsChanged } = useReviews();
 
     const isCurrentCafeDraft = draft.cafeId === googlePlaceId;
 
@@ -355,6 +357,7 @@ export default function AddReviewScreen({ route, navigation }: Props) {
             });
 
             clearDraft();
+            notifyReviewsChanged();
             navigation.goBack();
         }
         catch (error)
