@@ -1,11 +1,13 @@
 import {
+    ActivityIndicator,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { useAuth } from '../context/AuthContext';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamlist } from '../navigation/AppNavigator';
@@ -15,14 +17,50 @@ type Props = NativeStackScreenProps<RootStackParamlist, 'Login'>;
 export default function LoginScreen( {navigation}: Props) {
     const { login } = useAuth();
 
-    const hadleLogin = () => {
-        login();
-        navigation.goBack();
-    };
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
-    return (
+    const handleLogin = async () => {
+        if (
+            email.trim() === '' ||
+            password === ''
+        )
+        {
+            setError('Ingresá tu email y la contraseña');
+            return;
+        }
+
+        try
+        {
+            setError(null);
+            setIsLoading(true);
+
+            await login(
+                email.trim(),
+                password
+            );
+
+            navigation.goBack();
+        }
+        catch (error)
+        {
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : 'No se pudo iniciar sesión'
+            );
+        }
+        finally
+        {
+            setIsLoading(false);
+        }
+    };
+    
+        return (
         <SafeAreaView style={styles.container}>
-            <View>
+            <View style={styles.content}>
                 <Text style={styles.title}>
                     Iniciar sesión
                 </Text>
@@ -31,14 +69,69 @@ export default function LoginScreen( {navigation}: Props) {
                     Iniciá sesión para continuar en BusCafé.
                 </Text>
 
-                <TouchableOpacity
-                    style={styles.loginButton}
-                    onPress={hadleLogin}
-                >
-                    <Text style={styles.loginButtonText}>
-                        Iniciar sesión como usuario de prueba
-                    </Text>
-                </TouchableOpacity>
+                <View style={styles.form}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Email"
+                        placeholderTextColor="#9A8578"
+                        value={email}
+                        onChangeText={setEmail}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        keyboardType="email-address"
+                        editable={!isLoading}
+                    />
+
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Contraseña"
+                        placeholderTextColor="#9A8578"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        editable={!isLoading}
+                    />
+
+                    {error && (
+                        <Text style={styles.error}>
+                            {error}
+                        </Text>
+                    )}
+
+                    <TouchableOpacity
+                        style={[
+                            styles.loginButton,
+                            isLoading &&
+                                styles.loginButtonDisabled,
+                        ]}
+                        onPress={handleLogin}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <ActivityIndicator
+                                color="#FFFFFF"
+                            />
+                        ) : (
+                            <Text style={styles.loginButtonText}>
+                                Iniciar sesión
+                            </Text>
+                        )}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.registerLink}
+                        onPress={() =>
+                            navigation.replace('Register')
+                        }
+                        disabled={isLoading}
+                    >
+                        <Text style={styles.registerLinkText}>
+                            ¿No tenés cuenta? Registrate
+                        </Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </SafeAreaView>
     );
@@ -48,11 +141,16 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F8F1E7',
+    },
+
+    content: {
+        flex: 1,
         paddingHorizontal: 20,
+        justifyContent: 'center',
+        paddingBottom: 100,
     },
 
     title: {
-        marginTop: 20,
         fontSize: 28,
         fontWeight: '700',
         color: '#4A2416',
@@ -64,18 +162,55 @@ const styles = StyleSheet.create({
         color: '#7A6254',
     },
 
-    loginButton: {
+    form: {
         marginTop: 28,
-        backgroundColor: '#6B3A22',
+    },
+
+    input: {
+        backgroundColor: '#FFFFFF',
+        borderWidth: 1,
+        borderColor: '#E8D9C7',
+        borderRadius: 14,
+        paddingHorizontal: 14,
+        paddingVertical: 13,
+        fontSize: 15,
+        color: '#4A2416',
+        marginBottom: 14,
+    },
+
+    error: {
+        marginBottom: 14,
+        fontSize: 14,
+        color: '#A33A2B',
+    },
+
+    loginButton: {
+        marginTop: 4,
         paddingVertical: 14,
-        paddingHorizontal: 16,
         borderRadius: 14,
         alignItems: 'center',
+        backgroundColor: '#6B3A22',
+    },
+
+    loginButtonDisabled: {
+        opacity: 0.4,
     },
 
     loginButtonText: {
         color: '#FFFFFF',
         fontSize: 16,
+        fontWeight: '600',
+    },
+
+    registerLink: {
+        marginTop: 20,
+        alignItems: 'center',
+        paddingVertical: 8,
+    },
+
+    registerLinkText: {
+        color: '#6B3A22',
+        fontSize: 14,
         fontWeight: '600',
     },
 });

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import prisma from "../lib/prisma";
+import { AuthenticatedRequest, requireAuth } from "../middleware/auth";
 
 const router = Router();
 
@@ -19,12 +20,10 @@ function isOptionalBoolean(value: unknown): boolean
         typeof value === 'boolean';
 }
 
-router.post('/', async (req, res) => {
+router.post('/', requireAuth, async (req:AuthenticatedRequest, res) => {
     try
     {
         const {
-            userId,
-            
             googlePlaceId,
             cafeName,
             cafeAddress,
@@ -44,8 +43,6 @@ router.post('/', async (req, res) => {
         } = req.body;
 
         if (
-            !Number.isInteger(userId) ||
-            userId <= 0 ||
             typeof googlePlaceId !== 'string' ||
             googlePlaceId.trim() === '' ||
             typeof cafeName !== 'string' ||
@@ -72,20 +69,16 @@ router.post('/', async (req, res) => {
         )
         {
             return res.status(400).json({
-                error: 'Los datos de la reseña son inválidos',
+                error: 'Datos de reseña inválidos',
             });
         }
 
-        const user = await prisma.user.findUnique({
-            where: {
-                id: userId,
-            },
-        });
-
-        if (!user)
+        const userId = req.userId;
+        
+        if (!userId)
         {
-            return res.status(404).json({
-                error: 'Usuario no encontrado',
+            return res.status(401).json({
+                error: 'Autenticación requerida',
             });
         }
 

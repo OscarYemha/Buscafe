@@ -1,5 +1,6 @@
 import { CafeSummary } from "../types/CafeSummary";
 import { CafeDetail } from "../types/CafeDetail";
+import * as SecureStore from 'expo-secure-store';
 
 const API_URL =
     process.env.EXPO_PUBLIC_API_URL ??
@@ -108,7 +109,7 @@ export async function getCafeDetails(
         `${encodeURIComponent(googlePlaceId)}`
     );
 
-    if (!response)
+    if (!response.ok)
     {
         throw new Error(
             'No se pudo obtener el detalle de la cafetería'
@@ -119,8 +120,6 @@ export async function getCafeDetails(
 }
 
 export type CreateReviewData = {
-    userId: number;
-
     googlePlaceId: string;
     cafeName: string;
     cafeAddress: string;
@@ -144,8 +143,58 @@ export type CreateReviewData = {
 export async function createReview(
     data: CreateReviewData
 ) {
+    const token = await SecureStore.getItemAsync('auth_token');
+
+    if (!token)
+    {
+        throw new Error('Tenés que iniciar sesión para publicar una reseña');
+    }
+
     const response = await fetch(
         `${API_URL}/reviews`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(data),
+        }
+    );
+
+    if (!response.ok)
+    {
+        throw new Error(
+            'No se pudo publicar la reseña'
+        );
+    }
+
+    return response.json();
+}
+
+export type AuthUser = {
+    id: number;
+    name: string;
+    email: string;
+};
+
+export type LoginResponse = {
+    token: string;
+    user: AuthUser;
+};
+
+export type RegisterData = {
+    name: string;
+    email: string;
+    password: string;
+}
+
+export async function registerUser(
+    data: RegisterData
+): Promise<LoginResponse>
+{
+    const response = await fetch(
+        `${API_URL}/users`,
         {
             method: 'POST',
             headers: {
@@ -157,9 +206,65 @@ export async function createReview(
 
     if (!response.ok)
     {
+        const responseData = await response.json();
+
         throw new Error(
-            'No se pudo publicar la reseña'
+            responseData.error ??
+            'No se pudo crear la cuenta'
         );
+    }
+
+    return response.json();
+}
+
+export async function loginUser(
+    email: string,
+    password: string
+): Promise<LoginResponse>
+{
+    const response = await fetch(
+        `${API_URL}/users/login`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email,
+                password
+            }),
+        }
+    );
+
+    if (!response.ok)
+    {
+        const data = await response.json();
+
+        throw new Error(
+            data.error ??
+            'No se pudo iniciar sesión'
+        );
+    }
+
+    return response.json();
+}
+
+export async function getCurrentUser(
+    token: string
+): Promise<AuthUser> 
+{
+    const response = await fetch(
+        `${API_URL}/users/me`,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+    
+    if (!response.ok)
+    {
+        throw new Error('No se pudo restaurar la sesión');
     }
 
     return response.json();

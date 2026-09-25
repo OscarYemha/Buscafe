@@ -320,8 +320,6 @@ export default function AddReviewScreen({ route, navigation }: Props) {
         try
         {
             await createReview({
-                userId: user.id,
-
                 googlePlaceId,
                 cafeName,
                 cafeAddress,

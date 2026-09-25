@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
+import { CompositeScreenProps, useFocusEffect } from '@react-navigation/native';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { MainTabParamList, RootStackParamlist } from '../navigation/AppNavigator';
 import { StatusBar } from 'expo-status-bar';
 import {
   AppState,
+  Image,
   Linking,
   ScrollView,
   StyleSheet,
@@ -11,8 +15,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamlist } from '../navigation/AppNavigator';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { cafeIntents } from '../data/cafeIntents';
 import NearbyCafeCard from '../components/NearbyCafeCard';
@@ -20,7 +22,13 @@ import { CafeSummary } from '../types/CafeSummary';
 import { getNearbyCafes, searchCafes } from '../services/api';
 import { getCurrentLocation, UserLocation } from '../services/location';
 
-type Props = NativeStackScreenProps<RootStackParamlist, 'Home'>;
+type Props = CompositeScreenProps<
+    BottomTabScreenProps<
+        MainTabParamList,
+        'Home'
+    >,
+    NativeStackScreenProps<RootStackParamlist>
+>;
 
 
 export default function HomeScreen({navigation}: Props) {
@@ -232,7 +240,7 @@ export default function HomeScreen({navigation}: Props) {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <ScrollView
         ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
@@ -248,7 +256,18 @@ export default function HomeScreen({navigation}: Props) {
         <StatusBar style="dark" />
 
         <View style={styles.header}>
-          <Text style={styles.logo}>BusCafé</Text>
+          <View style={styles.brandRow}>
+            <Text style={styles.logo}>
+              BusCafé
+            </Text>
+
+            <Image
+              source={require('../../assets/buscafe-icon.png')}
+              style={styles.logoImage}
+              resizeMode="cover"
+            />
+          </View>
+
           <Text style={styles.subtitle}>
             Encontrá el café ideal para tu momento
           </Text>
@@ -409,21 +428,6 @@ export default function HomeScreen({navigation}: Props) {
             </Text>
           </TouchableOpacity>
         )}
-        {searchText.trim().length < 3 &&
-          !loading && 
-          !error && 
-          cafes.length > 0 && (
-          <TouchableOpacity
-            style={styles.mapButton}
-            onPress={() => {
-              console.log('Abrir mapa');
-            }}
-          >
-            <Text style={styles.mapButtonText}>
-              🗺️ Ver en el mapa
-            </Text>
-          </TouchableOpacity>
-        )}
       </ScrollView>
       {showScrollTop && (
         <TouchableOpacity
@@ -453,6 +457,18 @@ const styles = StyleSheet.create({
   header: {
     marginTop: 20,
     marginBottom: 24,
+  },
+
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+
+  logoImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
   },
 
   logo: {
@@ -551,20 +567,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: '#E8D9C7',
-  },
-
-  mapButton: {
-    marginTop: 16,
-    backgroundColor: '#6B3A22',
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: 'center',
-  },
-
-  mapButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
   },
 
   showAllButton: {

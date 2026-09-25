@@ -1,0 +1,251 @@
+import {
+    ActivityIndicator,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+
+import { useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+
+import { RootStackParamlist } from '../navigation/AppNavigator';
+import { useAuth } from '../context/AuthContext';
+
+type Props =
+    NativeStackScreenProps<
+        RootStackParamlist,
+        'Register'
+    >;
+
+export default function RegisterScreen({
+    navigation,
+}: Props)
+{
+    const { register } = useAuth();
+
+    const [name, setName] =
+        useState('');
+
+    const [email, setEmail] =
+        useState('');
+
+    const [password, setPassword] =
+        useState('');
+
+    const [error, setError] =
+        useState<string | null>(null);
+
+    const [isLoading, setIsLoading] =
+        useState(false);
+
+    const handleRegister = async () => {
+        if (
+            name.trim() === '' ||
+            email.trim() === '' ||
+            password === ''
+        )
+        {
+            setError(
+                'Completá todos los campos'
+            );
+
+            return;
+        }
+
+        if (password.length < 8)
+        {
+            setError(
+                'La contraseña debe tener al menos 8 caracteres'
+            );
+
+            return;
+        }
+
+        try
+        {
+            setError(null);
+            setIsLoading(true);
+
+            await register(
+                name.trim(),
+                email.trim(),
+                password
+            );
+
+            navigation.goBack();
+        }
+        catch (error)
+        {
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : 'No se pudo crear la cuenta'
+            );
+        }
+        finally
+        {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <View style={styles.content}>
+                <Text style={styles.title}>
+                    Crear cuenta
+                </Text>
+
+                <Text style={styles.description}>
+                    Registrate para guardar tus cafés favoritos y compartir reseñas.
+                </Text>
+
+                <TextInput
+                    style={styles.input}
+                    placeholder="Nombre"
+                    placeholderTextColor="#9A8578"
+                    value={name}
+                    onChangeText={setName}
+                    editable={!isLoading}
+                />
+
+                <TextInput
+                    style={styles.input}
+                    placeholder="Email"
+                    placeholderTextColor="#9A8578"
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    keyboardType="email-address"
+                    editable={!isLoading}
+                />
+
+                <TextInput
+                    style={styles.input}
+                    placeholder="Contraseña"
+                    placeholderTextColor="#9A8578"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    editable={!isLoading}
+                />
+
+                {error && (
+                    <Text style={styles.error}>
+                        {error}
+                    </Text>
+                )}
+
+                <TouchableOpacity
+                    style={[
+                        styles.registerButton,
+                        isLoading &&
+                            styles.buttonDisabled,
+                    ]}
+                    onPress={handleRegister}
+                    disabled={isLoading}
+                >
+                    {isLoading ? (
+                        <ActivityIndicator />
+                    ) : (
+                        <Text style={styles.registerButtonText}>
+                            Crear cuenta
+                        </Text>
+                    )}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.loginLink}
+                    onPress={() =>
+                        navigation.replace('Login')
+                    }
+                    disabled={isLoading}
+                >
+                    <Text style={styles.loginLinkText}>
+                        ¿Ya tenés cuenta? Iniciá sesión
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        </SafeAreaView>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#F8F1E7',
+    },
+
+    content: {
+        flex: 1,
+        paddingHorizontal: 20,
+        justifyContent: 'center',
+        paddingBottom: 20,
+    },
+
+    title: {
+        fontSize: 28,
+        fontWeight: '700',
+        color: '#4A2416',
+    },
+
+    description: {
+        marginTop: 8,
+        marginBottom: 28,
+        fontSize: 15,
+        color: '#7A6254',
+    },
+
+    input: {
+        marginBottom: 14,
+        paddingHorizontal: 14,
+        paddingVertical: 13,
+        backgroundColor: '#FFFFFF',
+        borderWidth: 1,
+        borderColor: '#E8D9C7',
+        borderRadius: 14,
+        fontSize: 15,
+        color: '#4A2416',
+    },
+
+    error: {
+        marginBottom: 14,
+        fontSize: 14,
+        color: '#A33A2B',
+    },
+
+    registerButton: {
+        marginTop: 8,
+        backgroundColor: '#6B3A22',
+        paddingVertical: 14,
+        borderRadius: 14,
+        alignItems: 'center',
+    },
+
+    buttonDisabled: {
+        opacity: 0.5,
+    },
+
+    registerButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+
+    loginLink: {
+        marginTop: 20,
+        alignItems: 'center',
+        paddingVertical: 8,
+    },
+
+    loginLinkText: {
+        color: '#6B3A22',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+});
